@@ -4,7 +4,7 @@ import requests
 from dataclasses import Field, asdict, dataclass, fields
 from typing import Any, Dict, List
 
-from api import API
+from .api import API
 
 @dataclass
 class BaseController:
