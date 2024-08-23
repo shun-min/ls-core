@@ -1,45 +1,29 @@
-import inspect
 import requests
 
-from dataclasses import Field, asdict, dataclass, fields
-from typing import Any, Dict, List
+from collections.abc import Mapping
+from typing import Any, Dict, Generic, List, TypeVar
 
-from .api import API
+from .api import (
+    API, 
+    URL,
+)
 
-@dataclass
-class BaseController:
-    '''
-    Base class to be implemented by concrete controllers
-    '''
-    def to_dict(self) -> Dict[str, Any]:
-        dict_ = {
-            k: v for k, v in asdict(self).items()
-        }
-        return dict_
+T = TypeVar("T")
 
-    @classmethod
-    def from_dict(cls, dict_: dict):
-        params = inspect.signature(cls).parameters
-
-        return cls(
-            **{
-                k: v for k, v in dict_.items()
-                if k in params
-            }
-        )
-
-
-class Project(BaseController):
-    def __init__(self):
-        self.api = API()
-    def get_all_projects(self):
-        url = f"{self.api.host}{self.api.api_version}dashboard/projects/"
-        print("get all projects")
-        response = requests.get(url=url)
+class ProjectController(Generic[T]):
+    def get_assigned_projects(self):
+        response = API._get(url=URL.project)
+        return response
     
-    def get_assets(self):
-        print("getting assets")
+    def get_assets(self) -> None:
+        response = API._get(url=URL.all_assets)
         
-        
-    def get_shots(self):
+    def get_all_shots(self) -> None:
         print("getting shots")
+
+    def get_shots_by_episode(
+        self,
+        episode: int,
+        expand: List[str],
+    ) -> None:
+        API._get(url=URL.shots_by_episode)        
