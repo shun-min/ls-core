@@ -1,27 +1,24 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict
+from typing import Annotated, Any, Dict, TypeVar
+
+from pydantic import Field
+
+from lemonsky.common.models import BaseModel
+from lemonsky.lemoncore.hrm.models import EmployeeModel
 
 
-class BaseModel:
-    '''
-    Base class to be implemented by concrete controllers
-    
-    '''
-    def to_dict(self) -> Dict[str, Any]:
-        dict_ = {
-            k: v for k, v in asdict(self).items()
-        }
-        return dict_
+_UnionT = TypeVar("_UnionT")
+LeftToRight = Annotated[
+    _UnionT,
+    Field(union_mode="left_to_right"),
+]
 
-    @classmethod
-    def from_dict(cls, dict_: dict):
-        _ = {
-            k: v for k, v in dict_.items()
-            if k in cls.__annotations__
-        }
-        
-        return cls(**_)
+
+@dataclass
+class SelfURLModel(BaseModel):
+    id: int
+    url: str
 
 
 @dataclass
@@ -48,7 +45,7 @@ class ProjectModel(BaseModel):
     # end_date: date
     creation_date: datetime
     modified_date: datetime
-    # created_by: LeftToRight[EmployeeModel | SelfURLModel]
+    created_by: LeftToRight[EmployeeModel | SelfURLModel]
     init_file_path: str | None
     working_file_path: str | None
 
@@ -60,13 +57,13 @@ class ContentMixin:
     modified_dt: datetime
     flow_id: int | None
     flow_type: str | None
-    # project: LeftToRight[ProjectModel | SelfURLModel]
+    project: LeftToRight[ProjectModel | SelfURLModel]
     name: str
     description: str
     outsource: bool
-    # created_by: LeftToRight[EmployeeModel | SelfURLModel]
-    # modified_by: LeftToRight[EmployeeModel | SelfURLModel]
-    # locked_by: LeftToRight[EmployeeModel | SelfURLModel] | None
+    created_by: LeftToRight[EmployeeModel | SelfURLModel]
+    modified_by: LeftToRight[EmployeeModel | SelfURLModel]
+    locked_by: LeftToRight[EmployeeModel | SelfURLModel] | None
     
 
 @dataclass
