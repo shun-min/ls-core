@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from .models import (
+from ..data.dashboard.models import (
     ProjectModel,
     TaskModel,
 )

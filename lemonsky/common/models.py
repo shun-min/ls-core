@@ -1,6 +1,14 @@
-from dataclasses import asdict
-from typing import Any, Dict, TypeVar
+from dataclasses import asdict, dataclass
+from typing import Annotated, Any, Dict, TypeVar
 
+from pydantic import Field
+
+
+_UnionT = TypeVar("_UnionT")
+LeftToRight = Annotated[
+    _UnionT,
+    Field(union_mode="left_to_right"),
+]
 
 class BaseModel:
     '''
@@ -21,3 +29,9 @@ class BaseModel:
         }
         
         return cls(**_)
+
+
+@dataclass
+class SelfURLModel(BaseModel):
+    id: int
+    url: str

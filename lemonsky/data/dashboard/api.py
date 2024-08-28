@@ -10,9 +10,9 @@ class URL:
 
     @classmethod
     def project(
-        project_name: str,
+        name: str,
     ):
-        return rf"skyline/project?name={project_name}"
+        return rf"skyline/project?name={name}"
 
     @classmethod
     def shots_by_episode(

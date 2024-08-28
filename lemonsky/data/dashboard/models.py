@@ -1,24 +1,22 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Annotated, Any, Dict, TypeVar
+from datetime import date, datetime
+from typing import Any, Dict
 
-from pydantic import Field
-
-from lemonsky.common.models import BaseModel
-from lemonsky.lemoncore.hrm.models import EmployeeModel
-
-
-_UnionT = TypeVar("_UnionT")
-LeftToRight = Annotated[
-    _UnionT,
-    Field(union_mode="left_to_right"),
-]
-
-
-@dataclass
-class SelfURLModel(BaseModel):
-    id: int
-    url: str
+from .enums import (
+    ContentType,
+    ProjectDivision,
+    ProjectStage,
+    ProjectType,
+)
+from lemonsky.common.models import (
+    BaseModel, 
+    LeftToRight, 
+    SelfURLModel,
+)
+from lemonsky.data.hrm.models import (
+    ClientModel, 
+    EmployeeModel
+)
 
 
 @dataclass
@@ -29,20 +27,20 @@ class ProjectModel(BaseModel):
     is_secret: bool
     shotgun_project_id: int | None
     production_path: str
-    # division: ProjectDivision
-    # stage: ProjectStage
-    # type: ProjectType
+    division: ProjectDivision
+    stage: ProjectStage
+    type: ProjectType
     publish_path: str | None
     version_path: str | None
     workfiles_path: str | None
     poster: str | None
     description: str
-    # client: LeftToRight[ClientModel | SelfURLModel] | None
+    client: LeftToRight[ClientModel | SelfURLModel] | None
     production_path: str
     backup_path: str | None
     project_file_prefix: str | None
-    # start_date: date
-    # end_date: date
+    start_date: date
+    end_date: date
     creation_date: datetime
     modified_date: datetime
     created_by: LeftToRight[EmployeeModel | SelfURLModel]
@@ -64,12 +62,21 @@ class ContentMixin:
     created_by: LeftToRight[EmployeeModel | SelfURLModel]
     modified_by: LeftToRight[EmployeeModel | SelfURLModel]
     locked_by: LeftToRight[EmployeeModel | SelfURLModel] | None
-    
+
+
+@dataclass
+class ContentGroup:
+    id: int
+    content: ContentType
+    category: str
+    type: str
+
 
 @dataclass
 class SeasonModel(ContentMixin, BaseModel):
     name: str
-    
+
+
 @dataclass
 class EpisodeModel(ContentMixin, BaseModel):
     season: SeasonModel
@@ -82,7 +89,17 @@ class SequenceModel(ContentMixin, BaseModel):
 @dataclass
 class ShotModel(BaseModel):
     sequence: SequenceModel
-    # group: ContentGroupModel
+    group: ContentGroup
+
+
+@dataclass
+class AssetModel:
+    id: int
+    shot: ShotModel | None
+    slot: int | None
+    group: ContentGroup
+    initials: str
+    batch: str | None
 
 
 @dataclass
