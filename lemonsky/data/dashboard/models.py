@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from .enums import (
     ContentType,
@@ -113,3 +113,30 @@ class TaskModel(BaseModel):
     id: int
     name: str
     step: StepModel
+
+
+@dataclass
+class VersionModel(BaseModel):
+    id: int
+    client_version: int
+    internal_version: int
+
+
+@dataclass
+class PublishKey(BaseModel):
+    id: int
+    name: int
+
+
+@dataclass
+class FileModel(BaseModel):
+    id: int
+    version_id: int
+    version_type: str
+    keys: List[PublishKey]
+    parent: List[Any]
+    path: str
+    setting_keyword: str
+    start_frame: int
+    end_frame: int
+ 

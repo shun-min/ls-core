@@ -10,15 +10,20 @@ class URL:
 
     @classmethod
     def project(
+        cls,
         name: str,
     ):
         return rf"skyline/project?name={name}"
 
+    def get_episode_id():
+        return
+    
     @classmethod
     def shots_by_episode(
         cls, 
         episode: int
     ) -> str:
+        
         return rf"skyline_content/shots?episode_id={episode}"
 
 
