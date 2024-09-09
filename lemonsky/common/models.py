@@ -13,7 +13,7 @@ LeftToRight = Annotated[
 class BaseModel:
     '''
     Base class to be implemented by concrete controllers
-    
+
     '''
     def to_dict(self) -> Dict[str, Any]:
         dict_ = {
@@ -27,7 +27,7 @@ class BaseModel:
             k: v for k, v in dict_.items()
             if k in cls.__annotations__
         }
-        
+
         return cls(**_)
 
 

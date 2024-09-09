@@ -7,14 +7,16 @@ from .enums import (
     ProjectDivision,
     ProjectStage,
     ProjectType,
+    TaskPriority,
+    TaskStatus,
 )
 from lemonsky.common.models import (
-    BaseModel, 
-    LeftToRight, 
+    BaseModel,
+    LeftToRight,
     SelfURLModel,
 )
 from lemonsky.data.hrm.models import (
-    ClientModel, 
+    ClientModel,
     EmployeeModel
 )
 
@@ -65,7 +67,7 @@ class ContentMixin:
 
 
 @dataclass
-class ContentGroup:
+class ContentGroupModel:
     id: int
     content: ContentType
     category: str
@@ -89,7 +91,7 @@ class SequenceModel(ContentMixin, BaseModel):
 @dataclass
 class ShotModel(BaseModel):
     sequence: SequenceModel
-    group: ContentGroup
+    group: ContentGroupModel
 
 
 @dataclass
@@ -97,9 +99,28 @@ class AssetModel:
     id: int
     shot: ShotModel | None
     slot: int | None
-    group: ContentGroup
+    group: ContentGroupModel
     initials: str
     batch: str | None
+
+
+@dataclass
+class MotionModel:
+    id: int
+    asset: AssetModel | None
+    group: ContentGroupModel
+    batch: str | None
+    package: str | None
+    department: str | None
+    typeskin: str | None
+    motion_class: str | None
+    subtype: str | None
+    direction: str | None
+    motion_variant: str | None
+    lod: str | None
+
+
+ContentState = ShotModel | AssetModel | MotionModel
 
 
 @dataclass
@@ -111,15 +132,45 @@ class StepModel(BaseModel):
 @dataclass
 class TaskModel(BaseModel):
     id: int
-    name: str
-    step: StepModel
+    flow_id: int | None
+    flow_type: str | None
+    draft: bool
+    project_content_type: ContentType
+    project_content: LeftToRight[ContentState | SelfURLModel]
+    step: LeftToRight[StepModel | SelfURLModel]
+    status: TaskStatus
+    priority: TaskPriority
+    description: str
+    client_version: int
+    created_by: EmployeeModel
+    creation_time: datetime
+    modified_time: datetime
+    assign_to: EmployeeModel | None
+    assign_date: datetime | None
+    assign_by: EmployeeModel | None
+    start_date: date
+    end_date: date
+    completion_percent: float
+    actual_start_date: datetime | None
+    actual_end_date: datetime | None
+    is_master: bool
 
 
 @dataclass
 class VersionModel(BaseModel):
     id: int
+    task: TaskModel
     client_version: int
     internal_version: int
+    checkout_by: EmployeeModel | None
+    modified_time: datetime | None
+    source_file_path: str | None
+    publish_by: EmployeeModel | None
+    publish_time: datetime | None
+    publish_comment: str | None
+    creation_time: datetime
+    client_feedback: str | None
+    status: TaskStatus
 
 
 @dataclass
@@ -139,4 +190,3 @@ class FileModel(BaseModel):
     setting_keyword: str
     start_frame: int
     end_frame: int
- 

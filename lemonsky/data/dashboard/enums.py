@@ -105,3 +105,31 @@ class ProjectType(StrEnum):
             ProjectType.DEMO: "Demo",
         }
         return labels[self]
+
+
+class TaskPriority(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+    def label(self) -> str:
+        labels = {
+            TaskPriority.LOW: "Low",
+            TaskPriority.MEDIUM: "Medium",
+            TaskPriority.HIGH: "High",
+        }
+        return labels[self]
+
+
+class TaskStatus(StrEnum):
+    NEW = "new"
+    WIP = "wip"
+    PUB = "pub"
+
+    def label(self) -> str:
+        labels = {
+            TaskStatus.NEW: "New",
+            TaskStatus.WIP: "WIP",
+            TaskStatus.PUB: "Published",
+        }
+        return labels[self]

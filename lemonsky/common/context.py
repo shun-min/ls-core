@@ -23,11 +23,11 @@ class ToolContext():
 
     def init_context():
         return
-    
+
     def get_assets(self) -> None:
         response = API._get(url=URL.all_assets)
         return response
-        
+
     def get_all_shots(self) -> None:
         print("getting shots")
 
