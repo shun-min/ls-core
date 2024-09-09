@@ -48,8 +48,8 @@ class Content(BaseController[ShotModel | AssetModel]):
         project: str,
         type: ContentType,
         name: str,
-    ):  
-        
+    ):
+
         return
 
     def get_tasks():
@@ -63,7 +63,7 @@ class Task(BaseController[TaskModel]):
     @classmethod
     def get():
         return
-    
+
     def get_all_versions():
         return
 
@@ -72,7 +72,7 @@ class Task(BaseController[TaskModel]):
 
     def get_version():
         return
-    
+
     def get_files():
         return
 
@@ -82,13 +82,13 @@ class Task(BaseController[TaskModel]):
 
 class Version(BaseController[VersionModel]):
     model = VersionModel
-    
+
     def get_master_file(self):
         return
 
     def get_task_file(self):
         return
-    
+
     def get_internal_file(self):
         return
 
