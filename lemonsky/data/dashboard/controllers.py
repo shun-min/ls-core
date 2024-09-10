@@ -20,6 +20,7 @@ from .url_wrapper import (
     URL,
 )
 
+api =  API()
 T = TypeVar("T")
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -31,25 +32,24 @@ class Project(BaseController[ProjectModel]):
     model = ProjectModel
 
     @classmethod
-    def get(cls, name: str) -> ProjectModel:
-        response = API._get(url=URL.project(name=name))
-        entities = cls.model.from_dict(response.json())
-        return entities
+    def get(cls, code: str) -> ProjectModel:
+        result = api._get(url=URL.project(code=code))
+        project = cls.model.from_dict(result)
+        return project
 
     @classmethod
-    def get_assigned_projects(self):
-        response = API._get(url=URL.assigned_projects)
-        projects = response.json()
+    def get_assigned_projects(cls):
+        projects = api._get(url=URL.assigned_projects)
         return projects
 
 
-class Content(BaseController[ShotModel | AssetModel]):
+class Content(BaseController[ShotModel]):
     def get_content(
-        project: str,
+        project_code: str,
         type: ContentType,
         name: str,
     ):
-
+        project = Project.get(code=project_code)
         return
 
     def get_tasks():

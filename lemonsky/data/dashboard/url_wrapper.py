@@ -1,7 +1,20 @@
+import json
 import requests
 
 from typing import Any, Dict, Optional
 
+from lemonsky.common.constants import (
+    METADATA_PATH,
+    RESOURCES_ROOT,
+)
+from lemonsky.common.helpers import (
+    Utils
+)
+from lemonsky.common.singleton import Singleton
+
+from lemonsky.common.enums import (
+    HOST,
+)
 from .models import (
     ContentType,
 )
@@ -14,9 +27,9 @@ class URL:
     @classmethod
     def project(
         cls,
-        name: str,
+        code: str,
     ):
-        return rf"skyline/project?name={name}"
+        return rf"skyline/project?code={code}"
 
     def get_episode_id():
         return
@@ -26,7 +39,6 @@ class URL:
         cls,
         episode: int
     ) -> str:
-
         return rf"skyline_content/shots?episode_id={episode}"
 
     @classmethod
@@ -40,29 +52,49 @@ class URL:
     @classmethod
     def get_content(
         cls,
-        project_name: str,
+        project_id: int,
         type: ContentType,
         name: str,
-    ) -> Dict[str: Any]:
-        project_id = Project.get(name=project_name)
+    ) -> str:
         return rf"skyline/{type}?project_id={project_id}&"
 
-class API():
-    version = "api/v1"
-    host = "http://127.0.0.1:8000"
-    _header: Dict[str, str] = {
-        "Authorization": "Token 90b073429732f60bcabbf9a6aeed8f5ffb8ebd3e"
-    }
+class API(Singleton):
+    def __init__(self) -> None:
+        super().__init__()
+        self.metadata = self.get_metadata()
+        self._host = self._set_host()
+        self._version = self._set_version()
+        self._header = self._set_header()
 
-    @classmethod
+    def get_metadata(self):
+        json_obj = Utils.json_load(path=METADATA_PATH)
+        return json_obj
+
+    def _set_host(self):
+        host = "https://lemoncore.lemonskystudios.com"
+        if self.metadata["HOST"] == HOST.DEV:
+            host = "http://127.0.0.1:8000"
+        return host
+
+    def _set_version(self):
+        return "api/v1"
+    
+    def _set_header(self)-> Dict[str, str]:
+        settings_path = RESOURCES_ROOT / "settings.json"
+        json_obj = Utils.json_load(path=settings_path)
+        return json_obj["HEADER"]
+
     def _get(
-        cls,
+        self,
         url: str,
     ):
-        full_url = f"{cls.host}/{cls.version}/{url}"
+        full_url = f"{self._host}/{self._version}/{url}"
         print(f"URL: {full_url}")
         response = requests.get(
             url=full_url,
-            headers=cls._header,
+            headers=self._header,
         )
-        return response
+        if not response.ok:
+            response.raise_for_status()
+        result = response.json()
+        return result

@@ -48,8 +48,5 @@ class Publisher(object):
     def add_files(self):
         print("add_files")
 
-    def add_keys(self, value: List[str]):
-        print("add keys")
-
     def publish(self):
         return
