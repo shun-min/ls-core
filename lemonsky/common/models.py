@@ -23,6 +23,7 @@ class BaseModel:
 
     @classmethod
     def from_dict(cls, dict_: dict):
+        assert type(dict_) != list, f"{cls.__name__} instance must be a List. "
         _ = {
             k: v for k, v in dict_.items()
             if k in cls.__annotations__

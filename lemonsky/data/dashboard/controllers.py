@@ -9,6 +9,7 @@ from lemonsky.data.dashboard.models import (
     ProjectModel,
     AssetModel,
     ShotModel,
+    MotionModel,
     TaskModel,
     VersionModel,
     FileModel,
@@ -16,11 +17,11 @@ from lemonsky.data.dashboard.models import (
     ContentType,
 )
 from .url_wrapper import (
-    API,
+    APIConfig,
     URL,
 )
 
-api =  API()
+_api =  APIConfig()
 T = TypeVar("T")
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -33,27 +34,62 @@ class Project(BaseController[ProjectModel]):
 
     @classmethod
     def get(cls, code: str) -> ProjectModel:
-        result = api._get(url=URL.project(code=code))
+        result = _api._get(url=URL.project(code=code))[0]
         project = cls.model.from_dict(result)
         return project
 
     @classmethod
     def get_assigned_projects(cls):
-        projects = api._get(url=URL.assigned_projects)
+        projects = _api._get(url=URL.assigned_projects)
         return projects
 
+class Shot(BaseController[ShotModel]):
+    model = ShotModel
+    @classmethod
+    def get(
+        cls, 
+        name: str,
+        project_code: str
+    ) -> ShotModel:
+        assert project_code, "Must pass in project code. "
+        project = Project.get(code=project_code)
+        result = _api._get(
+            url=URL.get_shot(
+                shot_code=name, 
+                project_id=project.id
+            )
+        )[0]
+        shot = cls.model.from_dict(result)
+        return shot
+        
 
-class Content(BaseController[ShotModel]):
-    def get_content(
+class Asset(BaseController[AssetModel]):
+    model = AssetModel
+
+
+class Motion(BaseController[MotionModel]):
+    model = MotionModel
+
+
+class Content():
+    @classmethod
+    def get(
+        cls,
         project_code: str,
         type: ContentType,
         name: str,
     ):
-        project = Project.get(code=project_code)
-        return
+        CONTENT_CLASS_MAP = {
+            "shot": Shot,
+            "asset": Asset,
+            "motion": Motion,
+        }
+        content_class = CONTENT_CLASS_MAP[type]
+        result = content_class.get(name=name, project_code=project_code)
+        content = cls.model.from_dict(result)
+        return content
 
     def get_tasks():
-
         return
 
 

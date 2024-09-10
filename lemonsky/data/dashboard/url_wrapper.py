@@ -28,11 +28,16 @@ class URL:
     def project(
         cls,
         code: str,
-    ):
-        return rf"skyline/project?code={code}"
+    ) -> str:
+        return rf"skyline/projects?code={code}"
 
-    def get_episode_id():
-        return
+    @classmethod
+    def get_shot(
+        cls,
+        shot_code: str,
+        project_id: int,
+    ) -> str:
+        return rf"skyline_content/shots?shot_code={shot_code}&project_id={project_id}"
 
     @classmethod
     def shots_by_episode(
@@ -58,7 +63,7 @@ class URL:
     ) -> str:
         return rf"skyline/{type}?project_id={project_id}&"
 
-class API(Singleton):
+class APIConfig(Singleton):
     def __init__(self) -> None:
         super().__init__()
         self.metadata = self.get_metadata()
