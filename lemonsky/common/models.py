@@ -1,3 +1,5 @@
+import inspect
+
 from dataclasses import asdict, dataclass
 from typing import Annotated, Any, Dict, TypeVar
 
@@ -23,10 +25,11 @@ class BaseModel:
 
     @classmethod
     def from_dict(cls, dict_: dict):
-        assert type(dict_) != list, f"{cls.__name__} instance must be a List. "
+        assert type(dict_) != list, f"{cls.__name__} instance must not be a List. "
+        params = inspect.signature(cls).parameters
         _ = {
             k: v for k, v in dict_.items()
-            if k in cls.__annotations__
+            if k in params
         }
 
         return cls(**_)

@@ -10,6 +10,7 @@ from lemonsky.data.dashboard.models import (
     AssetModel,
     ShotModel,
     MotionModel,
+    StepModel,
     TaskModel,
     VersionModel,
     FileModel,
@@ -34,9 +35,8 @@ class Project(BaseController[ProjectModel]):
 
     @classmethod
     def get(cls, code: str) -> ProjectModel:
-        result = _api._get(url=URL.project(code=code))[0]
-        project = cls.model.from_dict(result)
-        return project
+        result = _api._get(url=URL.get_project(code=code))[0]
+        return cls.model.from_dict(result)
 
     @classmethod
     def get_assigned_projects(cls):
@@ -45,6 +45,7 @@ class Project(BaseController[ProjectModel]):
 
 class Shot(BaseController[ShotModel]):
     model = ShotModel
+    
     @classmethod
     def get(
         cls, 
@@ -59,8 +60,10 @@ class Shot(BaseController[ShotModel]):
                 project_id=project.id
             )
         )[0]
-        shot = cls.model.from_dict(result)
-        return shot
+        return cls.model.from_dict(result)
+
+    def name():
+        return
         
 
 class Asset(BaseController[AssetModel]):
@@ -75,30 +78,63 @@ class Content():
     @classmethod
     def get(
         cls,
-        project_code: str,
         type: ContentType,
         name: str,
+        project_code: str,
     ):
         CONTENT_CLASS_MAP = {
             "shot": Shot,
             "asset": Asset,
             "motion": Motion,
         }
+        MODEL_MAP = {
+            "shot": ShotModel,
+            "asset": AssetModel,
+            "motion": MotionModel,
+        }
         content_class = CONTENT_CLASS_MAP[type]
-        result = content_class.get(name=name, project_code=project_code)
-        content = cls.model.from_dict(result)
-        return content
+        model = MODEL_MAP[type]
+
+        return content_class.get(name=name, project_code=project_code)
 
     def get_tasks():
         return
+
+
+class Step(BaseController[ProjectModel]):
+    model = StepModel
+
+    @classmethod
+    def get(cls, code: str) -> StepModel:
+        result = _api._get(url=URL.get_step(code=code))[0]
+        return cls.model.from_dict(result)
 
 
 class Task(BaseController[TaskModel]):
     model = TaskModel
 
     @classmethod
-    def get():
-        return
+    def get(
+        cls,
+        project_code: str,
+        content_type: str,
+        content_name: str,
+        step_code: str,
+    ):  
+        step = Step.get(code=step_code)
+        content = Content.get(
+            project_code=project_code,
+            type=content_type,
+            name=content_name,
+        )
+        result = _api._get(
+            url=URL.get_task(
+                content_type=content_type,
+                content_id=content.id,
+                step_id=step.id,
+            )
+        )[0]
+        return cls.model.from_dict(result)
 
     def get_all_versions():
         return
@@ -118,6 +154,20 @@ class Task(BaseController[TaskModel]):
 
 class Version(BaseController[VersionModel]):
     model = VersionModel
+    
+    def get(
+        self,
+        content_name: str,
+        content_type: str,
+        step_code: str,
+    ) -> VersionModel:
+        task: TaskModel = Task.get()
+        result = _api.get(
+            url=URL.get_version(
+                
+            )
+        )
+        return
 
     def get_master_file(self):
         return
@@ -145,6 +195,6 @@ class File(BaseController[FileModel]):
         setting_keyword: Optional[str] = "",
         version_id: Optional[int] = None,
     ) -> Dict[str, str | int | Dict[str, str]]:
-        response = API._get(url=URL.file(version_id=version_id))
+        response = _api._get(url=URL.file(version_id=version_id))
         entities = cls.model.from_dict(response.json())
         return entities

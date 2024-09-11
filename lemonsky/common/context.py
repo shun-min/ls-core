@@ -36,7 +36,7 @@ class ToolContext():
         episode: int,
         expand: Optional[List[str]] = [],
     ) -> None:
-        response = API._get(url=URL.shots_by_episode(episode=episode))
+        response = API._get(url=URL.get_shots_by_episode(episode=episode))
         return response
 
 

@@ -17,6 +17,7 @@ from lemonsky.common.enums import (
 )
 from .models import (
     ContentType,
+    TaskModel,
 )
 
 class URL:
@@ -25,11 +26,42 @@ class URL:
     all_assets = r"skyline_content/assets/"
 
     @classmethod
-    def project(
+    def get_project(
         cls,
         code: str,
     ) -> str:
         return rf"skyline/projects?code={code}"
+
+    @classmethod
+    def get_step(
+        cls,
+        code: str,
+    ) -> str:
+        return rf"skyline/steps?code={code}"
+
+    @classmethod
+    def get_task(
+        cls,
+        content_type: str,
+        content_id: int,
+        step_id: int,
+    ) -> str:
+        return rf"skyline/tasks?project_content_type={content_type}&content_id={content_id}&step_id={step_id}"
+    
+    @classmethod
+    def get_version(
+        cls,
+        task_id: str,
+    ) -> str:
+        return rf"skyline/versions?task_id={task_id}"
+        
+    
+    @classmethod
+    def get_shots_by_episode(
+        cls,
+        episode: int
+    ) -> str:
+        return rf"skyline_content/shots?episode_id={episode}"
 
     @classmethod
     def get_shot(
@@ -38,13 +70,6 @@ class URL:
         project_id: int,
     ) -> str:
         return rf"skyline_content/shots?shot_code={shot_code}&project_id={project_id}"
-
-    @classmethod
-    def shots_by_episode(
-        cls,
-        episode: int
-    ) -> str:
-        return rf"skyline_content/shots?episode_id={episode}"
 
     @classmethod
     def file(

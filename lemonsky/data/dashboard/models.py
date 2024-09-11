@@ -17,6 +17,7 @@ from lemonsky.common.models import (
 )
 from lemonsky.data.hrm.models import (
     ClientModel,
+    DepartmentModel,
     EmployeeModel
 )
 
@@ -89,14 +90,17 @@ class SequenceModel(ContentMixin, BaseModel):
     episode: EpisodeModel | None
 
 @dataclass
-class ShotModel(BaseModel):
+class ShotModel(ContentMixin, BaseModel):
+    shot_code: str
     sequence: SequenceModel
     group: ContentGroupModel
+    outsource: bool
 
 
 @dataclass
-class AssetModel:
+class AssetModel(ContentMixin, BaseModel):
     id: int
+    name: str
     shot: ShotModel | None
     slot: int | None
     group: ContentGroupModel
@@ -105,7 +109,7 @@ class AssetModel:
 
 
 @dataclass
-class MotionModel:
+class MotionModel(ContentMixin, BaseModel):
     id: int
     asset: AssetModel | None
     group: ContentGroupModel
@@ -126,7 +130,11 @@ ContentState = ShotModel | AssetModel | MotionModel
 @dataclass
 class StepModel(BaseModel):
     id: int
+    code: str
     name: str
+    full_name: str
+    description: str
+    departments: list[LeftToRight[DepartmentModel | SelfURLModel]]
 
 
 @dataclass
