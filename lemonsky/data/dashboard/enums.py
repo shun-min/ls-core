@@ -55,6 +55,7 @@ class ContentCategoryType(StrEnum):
     Motions = "Motions"
     LineUp = "LineUp"
 
+
 class ProjectDivision(StrEnum):
     ANIMATION = "animation"
     GAME = "game"

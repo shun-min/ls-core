@@ -1,12 +1,16 @@
+from datetime import datetime
 import os
-import django
+import sys
 import requests
 
 from collections.abc import Mapping
 from pydantic_core import Url
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
+import django
+
 from lemonsky.common.models import BaseModel
+from lemonsky.data.dashboard.constants import CONTENT_TYPE_MAP
 from lemonsky.data.dashboard.models import (
     ProjectModel,
     AssetModel,
@@ -24,6 +28,20 @@ from .url_wrapper import (
     URL,
 )
 
+sys.path.append(r"D:\projects\work\LemonCORE-Docker\django\lemoncore")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lemoncore.settings')
+django.setup()
+
+from skyline.models import (
+    SkylineProject,
+    SkylineTask,
+    SkylineVersion,
+)
+from skylinecontent.models import Shot as SkylineShot
+from skylinecontent.models import Asset as SkylineAsset
+from skylinecontent.models import Motion as SkylineMotion
+
+
 _api =  APIConfig()
 T = TypeVar("T")
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -32,7 +50,8 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 class BaseController(Generic[ModelT]):
     model: type[ModelT]
 
-class Project(BaseController[ProjectModel]):
+
+class _Project(BaseController[ProjectModel]):
     model = ProjectModel
 
     @classmethod
@@ -46,7 +65,15 @@ class Project(BaseController[ProjectModel]):
         return projects
 
 
-class Shot(BaseController[ShotModel]):
+class Project(BaseController[ProjectModel]):
+    model=SkylineProject
+
+    @classmethod
+    def get(cls, code: str) -> ProjectModel:
+        return SkylineProject.objects.get(code=code)
+
+
+class _Shot(BaseController[ShotModel]):
     model = ShotModel
     
     @classmethod
@@ -64,10 +91,30 @@ class Shot(BaseController[ShotModel]):
             )
         )[0]
         return cls.model.from_dict(result)
-
-    def name():
-        return
         
+
+class Shot(BaseController[ShotModel]):
+    model = SkylineShot
+    
+    @classmethod
+    def get(
+        cls, 
+        project_code: str,
+        name: str,
+    ) -> ShotModel:
+        assert project_code, "Must pass in project code. "
+        shot_code = name.split("_")
+        episode = shot_code[0]
+        sequence = shot_code[1]
+        shot = shot_code[2]
+        result = SkylineShot.objects.get(
+            project__code=project_code, 
+            sequence__episode__name=episode,
+            sequence__name= sequence,
+            name=shot,
+        )
+        return result
+
 
 class Asset(BaseController[AssetModel]):
     model = AssetModel
@@ -113,7 +160,7 @@ class Step(BaseController[ProjectModel]):
         return cls.model.from_dict(result)
 
 
-class Task(BaseController[TaskModel]):
+class _Task(BaseController[TaskModel]):
     model = TaskModel
 
     @classmethod
@@ -139,6 +186,40 @@ class Task(BaseController[TaskModel]):
         )[0]
         return cls.model.from_dict(result)
 
+
+class Task(BaseController[TaskModel]):
+    model = TaskModel
+    
+    @classmethod
+    def get(
+        cls,
+        project_code: str,
+        content_type: str,
+        content_name: str,
+        step_code: str,
+    ) -> SkylineTask:  
+        CONTENT_CLASS_MAP = {
+            "shot": Shot,
+            "asset": Asset,
+            "motion": Motion,
+        }
+        
+        content_class = CONTENT_CLASS_MAP[content_type]
+        content_type_id = CONTENT_TYPE_MAP[content_type]
+        content = content_class.get(
+            project_code=project_code, 
+            name=content_name
+        )
+        result = SkylineTask.objects.get(
+            project_content_type=content_type_id,
+            project_content_reference_id=content.id,
+            step__code=step_code,
+        )
+
+        if not result:
+            return []
+        return result
+
     def get_all_versions():
         return
 
@@ -148,30 +229,46 @@ class Task(BaseController[TaskModel]):
     def get_version():
         return
 
-    def get_files():
-        return
+    def create_version(
+        self,
+        task: TaskModel,
+    ):
+        return Version.create(task_id=task.id)
 
-    def get_step():
-        return
 
 
 class Version(BaseController[VersionModel]):
     model = VersionModel
     
+    @classmethod
     def get(
-        self,
-        content_name: str,
-        content_type: str,
-        step_code: str,
+        cls, 
+        id: Optional[int] = None,
+        step_name: Optional[str] = None,
+        task: Optional[TaskModel] = None,
     ) -> VersionModel:
-        task: TaskModel = Task.get()
-        result = _api.get(
-            url=URL.get_version(
-                
+        if id:
+            return SkylineVersion.objects.get(id=id)
+        if task:
+            return SkylineVersion.objects.get(
+                task__project_content_reference_id= task.id,
+                task__step__name=step_name,
             )
-        )
-        return
 
+    @classmethod
+    def create(
+        cls, 
+        task: SkylineTask,
+    ) -> SkylineVersion:
+        version = SkylineVersion.objects.create(
+            status="wip",
+            task=task,
+            client_version=2,
+            # publish_by=1940,
+            publish_time=datetime.now(),
+        )
+        return version
+    
     def get_master_file(self):
         return
 
