@@ -37,7 +37,31 @@ class URL:
         cls,
         code: str,
     ) -> str:
-        return rf"skyline/steps?code={code}"
+        return rf"skyline/steps?code={code}"      
+    
+    @classmethod
+    def get_shots_by_episode(
+        cls,
+        episode: int
+    ) -> str:
+        return rf"skyline_content/shots?episode_id={episode}"
+
+    @classmethod
+    def get_content(
+        cls,
+        project_id: int,
+        type: ContentType,
+        name: str,
+    ) -> str:
+        return rf"skyline/{type}?project_id={project_id}&"
+
+    @classmethod
+    def get_shot(
+        cls,
+        shot_code: str,
+        project_id: int,
+    ) -> str:
+        return rf"skyline_content/shots?shot_code={shot_code}&project_id={project_id}"
 
     @classmethod
     def get_task(
@@ -54,39 +78,13 @@ class URL:
         task_id: str,
     ) -> str:
         return rf"skyline/versions?task_id={task_id}"
-        
-    
-    @classmethod
-    def get_shots_by_episode(
-        cls,
-        episode: int
-    ) -> str:
-        return rf"skyline_content/shots?episode_id={episode}"
-
-    @classmethod
-    def get_shot(
-        cls,
-        shot_code: str,
-        project_id: int,
-    ) -> str:
-        return rf"skyline_content/shots?shot_code={shot_code}&project_id={project_id}"
 
     @classmethod
     def file(
         cls,
         version_id: int
     ) -> str:
-
         return rf"skyline/files?version_id={version_id}"
-
-    @classmethod
-    def get_content(
-        cls,
-        project_id: int,
-        type: ContentType,
-        name: str,
-    ) -> str:
-        return rf"skyline/{type}?project_id={project_id}&"
 
 class APIConfig(Singleton):
     def __init__(self) -> None:

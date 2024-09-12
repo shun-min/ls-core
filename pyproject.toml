@@ -14,6 +14,7 @@ dependencies = [
     "pydantic==2.8",
     "PySide6==6.7.2",
     "requests==2.32.3",
+    "django==4.2",
 ]
 
 [project.optional-dependencies]

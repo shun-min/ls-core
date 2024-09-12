@@ -1,7 +1,9 @@
-from pydantic_core import Url
+import os
+import django
 import requests
 
 from collections.abc import Mapping
+from pydantic_core import Url
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from lemonsky.common.models import BaseModel
@@ -42,6 +44,7 @@ class Project(BaseController[ProjectModel]):
     def get_assigned_projects(cls):
         projects = _api._get(url=URL.assigned_projects)
         return projects
+
 
 class Shot(BaseController[ShotModel]):
     model = ShotModel
