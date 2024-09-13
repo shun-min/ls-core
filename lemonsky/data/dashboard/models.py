@@ -52,12 +52,20 @@ class ProjectModel(BaseModel):
 
 
 @dataclass
-class ContentMixin:
-    id: int
+class CreateModifiedMixin:
     created_dt: datetime
     modified_dt: datetime
+
+
+@dataclass
+class FlowIdTypeMixin:
     flow_id: int | None
     flow_type: str | None
+
+
+@dataclass
+class ContentMixin(CreateModifiedMixin, FlowIdTypeMixin):
+    id: int
     project: LeftToRight[ProjectModel | SelfURLModel]
     name: str
     description: str
@@ -139,10 +147,8 @@ class StepModel(BaseModel):
 
 
 @dataclass
-class TaskModel(BaseModel):
+class TaskModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
     id: int
-    flow_id: int | None
-    flow_type: str | None
     draft: bool
     project_content_type: ContentTypeEnums
     project_content: LeftToRight[ContentState | SelfURLModel]
@@ -152,11 +158,9 @@ class TaskModel(BaseModel):
     description: str
     client_version: int
     created_by: EmployeeModel
-    creation_time: datetime
-    modified_time: datetime
+    assign_by: EmployeeModel | None
     assign_to: EmployeeModel | None
     assign_date: datetime | None
-    assign_by: EmployeeModel | None
     start_date: date
     end_date: date
     completion_percent: float
@@ -166,18 +170,16 @@ class TaskModel(BaseModel):
 
 
 @dataclass
-class VersionModel(BaseModel):
+class VersionModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
     id: int
     task: TaskModel
     client_version: int
     internal_version: int
     checkout_by: EmployeeModel | None
-    modified_time: datetime | None
+    publish_time: datetime | None
     source_file_path: str | None
     publish_by: EmployeeModel | None
-    publish_time: datetime | None
     publish_comment: str | None
-    creation_time: datetime
     client_feedback: str | None
     status: TaskStatus
 
@@ -189,7 +191,7 @@ class PublishKey(BaseModel):
 
 
 @dataclass
-class FileModel(BaseModel):
+class FileModel(BaseModel, CreateModifiedMixin):
     id: int
     version_id: int
     version_type: str

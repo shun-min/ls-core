@@ -63,7 +63,7 @@ print(version)
 
 version.add_file(
     keys = ["texture", "background"],
-    file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+    file_name=r"TS_101_01_001_Background_0298.exr",
     start_frame=298,
     end_frame=298,
 )
