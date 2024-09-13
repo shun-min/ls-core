@@ -34,6 +34,23 @@ class BaseModel:
 
         return cls(**_)
 
+    @classmethod
+    def from_django(cls, api_class, obj):
+        """Converts a django object into in-house Entity Model
+
+        Args:
+            api_class (_type_): wrapper model class (VersionModel, TaskModel)
+            obj (_type_): django result object
+
+        Returns:
+            _type_: _description_
+        """
+        fields = list(obj._meta.fields + obj._meta.many_to_many)
+        _ = {   
+            i.name: getattr(obj, i.name) for i in fields
+        }
+        return api_class(**_)
+
 
 @dataclass
 class SelfURLModel(BaseModel):

@@ -3,7 +3,7 @@ from datetime import date, datetime
 from typing import Any, Dict, List
 
 from .enums import (
-    ContentType,
+    ContentTypeEnums,
     ProjectDivision,
     ProjectStage,
     ProjectType,
@@ -70,7 +70,7 @@ class ContentMixin:
 @dataclass
 class ContentGroupModel:
     id: int
-    content: ContentType
+    content: ContentTypeEnums
     category: str
     type: str
 
@@ -88,6 +88,7 @@ class EpisodeModel(ContentMixin, BaseModel):
 @dataclass
 class SequenceModel(ContentMixin, BaseModel):
     episode: EpisodeModel | None
+
 
 @dataclass
 class ShotModel(ContentMixin, BaseModel):
@@ -143,7 +144,7 @@ class TaskModel(BaseModel):
     flow_id: int | None
     flow_type: str | None
     draft: bool
-    project_content_type: ContentType
+    project_content_type: ContentTypeEnums
     project_content: LeftToRight[ContentState | SelfURLModel]
     step: LeftToRight[StepModel | SelfURLModel]
     status: TaskStatus

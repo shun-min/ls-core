@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class ContentType(StrEnum):
+class ContentTypeEnums(StrEnum):
     Season = "season"
     Episode = "episode"
     Sequence = "sequence"
@@ -11,12 +11,12 @@ class ContentType(StrEnum):
 
     def label(self) -> str:
         labels = {
-            ContentType.Episode: "Episode",
-            ContentType.Season: "Season",
-            ContentType.Sequence: "Sequence",
-            ContentType.Shot: "Shot",
-            ContentType.Asset: "Asset",
-            ContentType.Motion: "Motion",
+            ContentTypeEnums.Episode: "Episode",
+            ContentTypeEnums.Season: "Season",
+            ContentTypeEnums.Sequence: "Sequence",
+            ContentTypeEnums.Shot: "Shot",
+            ContentTypeEnums.Asset: "Asset",
+            ContentTypeEnums.Motion: "Motion",
         }
         return labels[self]
 

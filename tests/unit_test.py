@@ -7,6 +7,7 @@ from lemonsky.data.dashboard.controllers import (
     Shot,
     Task,
     Version,
+    File,
 )
 
 # TODO: handle return multiple results
@@ -35,11 +36,36 @@ task = Task.get(
 )
 print(task)
 
-#TODO:
 version = Version.create(task=task)
-
-version.add_files()
-
 print(version)
-# version.add_files()
+
+# file1 = File.create(
+#     version_id=68,
+#     version_type="publish",
+#     keys = ["texture", "bg"],
+#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+#     start_frame=298,
+#     end_frame=298,
+# )
+# file2 = File.create(
+#     version_id=68,
+#     version_type="publish",
+#     keys = ["camera"],
+#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\associatedFiles\mayaCamera.abc",
+# )
+
+# file1 = File.create(
+#     keys = ["texture", "bg"],
+#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+#     start_frame=298,
+#     end_frame=298,
+# )
+
+version.add_file(
+    keys = ["texture", "background"],
+    file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+    start_frame=298,
+    end_frame=298,
+)
+print(version)
 # version.publish()

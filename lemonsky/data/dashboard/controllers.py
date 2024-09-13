@@ -21,7 +21,7 @@ from lemonsky.data.dashboard.models import (
     VersionModel,
     FileModel,
     ContentState,
-    ContentType,
+    ContentTypeEnums,
 )
 from .url_wrapper import (
     APIConfig,
@@ -32,11 +32,15 @@ sys.path.append(r"D:\projects\work\LemonCORE-Docker\django\lemoncore")
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lemoncore.settings')
 django.setup()
 
+from django.contrib.contenttypes.models import ContentType
 from skyline.models import (
     SkylineProject,
     SkylineTask,
     SkylineVersion,
+    SkylineVersionPreview,
+    PublishKey,
 )
+from skyline.models import File as SkylineFile
 from skylinecontent.models import Shot as SkylineShot
 from skylinecontent.models import Asset as SkylineAsset
 from skylinecontent.models import Motion as SkylineMotion
@@ -117,18 +121,18 @@ class Shot(BaseController[ShotModel]):
 
 
 class Asset(BaseController[AssetModel]):
-    model = AssetModel
+    model = SkylineAsset
 
 
 class Motion(BaseController[MotionModel]):
-    model = MotionModel
+    model = SkylineMotion
 
 
 class Content():
     @classmethod
     def get(
         cls,
-        type: ContentType,
+        type: ContentTypeEnums,
         name: str,
         project_code: str,
     ):
@@ -237,9 +241,9 @@ class Task(BaseController[TaskModel]):
 
 
 
-class Version(BaseController[VersionModel]):
+class Version(BaseController[VersionModel], VersionModel):
     model = VersionModel
-    
+        
     @classmethod
     def get(
         cls, 
@@ -259,15 +263,38 @@ class Version(BaseController[VersionModel]):
     def create(
         cls, 
         task: SkylineTask,
-    ) -> SkylineVersion:
-        version = SkylineVersion.objects.create(
+    ) -> VersionModel:
+        result = SkylineVersion.objects.create(
             status="wip",
             task=task,
             client_version=2,
-            # publish_by=1940,
             publish_time=datetime.now(),
         )
+        version = cls.model.from_django(cls, result)
         return version
+    
+    def add_file(
+        self,
+        file_name: str,
+        keys: Optional[List[str]] = [],
+        parent: Optional[int] = None,
+        setting_keyword: Optional[str] = "",
+        start_frame:  Optional[str] = None,
+        end_frame:  Optional[str] = None,
+    ):
+        version_id = self.id
+        result = File.create(
+            keys = keys,
+            file_name=file_name,
+            parent=parent,
+            setting_keyword=setting_keyword,
+            start_frame=start_frame,
+            end_frame=end_frame,
+            version_id=version_id,
+            version_type="skylineversion"
+        )
+        file = FileModel.from_django(File, result)
+        return file
     
     def get_master_file(self):
         return
@@ -278,15 +305,13 @@ class Version(BaseController[VersionModel]):
     def get_internal_file(self):
         return
 
-    def add_files(self, files: List):
-        return
-
     def publish(self,):
         return
 
 
-class File(BaseController[FileModel]):
+class _File(BaseController[FileModel]):
     model = FileModel
+    
     @classmethod
     def get(
         cls,
@@ -298,3 +323,58 @@ class File(BaseController[FileModel]):
         response = _api._get(url=URL.file(version_id=version_id))
         entities = cls.model.from_dict(response.json())
         return entities
+
+
+class File(BaseController[FileModel], FileModel):
+    model = FileModel
+    
+    @classmethod
+    def get(
+        cls,
+        keys: Optional[List[str]] = [],
+        parent: Optional[int] = None,
+        setting_keyword: Optional[str] = "",
+        version_type: Optional[str] = "skylineversion",
+        version_id: Optional[int] = None,
+    ) -> List[SkylineFile]:
+        files = File.objects.filter(
+            keys=keys, 
+            parent=parent,
+            setting_keyword=setting_keyword,
+            version_type=version_type,
+            version_id=version_id,
+        )
+        return files
+
+    @classmethod
+    def create(
+        cls,
+        file_name: str,
+        keys: Optional[List[str]] = [],
+        parent: Optional[int] = None,
+        setting_keyword: Optional[str] = "",
+        start_frame:  Optional[str] = None,
+        end_frame:  Optional[str] = None,
+        version_type: Optional[str] = "skylineversion",
+        version_id: Optional[int] = None,
+    ) -> SkylineFile:
+        version_contenttype = ContentType.objects.get(
+            app_label="skyline", model=version_type
+        )
+
+        key_instances = PublishKey.objects.filter(name__in=keys)
+        if key_instances.count() != len(keys):
+            raise KeyError(f"{len(keys)} keys given, {key_instances.count()} keys found in DB. confirm the key name being passed in during File creation is correct. ")
+
+        file: SkylineFile = SkylineFile.objects.create(
+            file_name=file_name,
+            parent=parent,
+            setting_keyword=setting_keyword,
+            version_type=version_contenttype,
+            version_id=version_id,
+            start_frame=start_frame,
+            end_frame=end_frame,
+        )
+        file.keys.set(key_instances)
+        file.save()
+        return file

@@ -16,7 +16,7 @@ from lemonsky.common.enums import (
     HOST,
 )
 from .models import (
-    ContentType,
+    ContentTypeEnums,
     TaskModel,
 )
 
@@ -50,7 +50,7 @@ class URL:
     def get_content(
         cls,
         project_id: int,
-        type: ContentType,
+        type: ContentTypeEnums,
         name: str,
     ) -> str:
         return rf"skyline/{type}?project_id={project_id}&"

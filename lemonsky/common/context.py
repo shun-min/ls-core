@@ -22,25 +22,29 @@ class ToolContext():
         self.active_task: TaskModel = None
 
     def init_context():
+        """
+        Init django LemonCORE-Web context,
+        fetch current task, current user, PC name etc
+        
+        """
         return
 
-    def get_assets(self) -> None:
-        response = API._get(url=URL.all_assets)
-        return response
+    def fetch_task_context():
+        return
 
-    def get_all_shots(self) -> None:
-        print("getting shots")
+    def fetch_current_user():
+        return
 
-    def get_shots_by_episode(
-        self,
-        episode: int,
-        expand: Optional[List[str]] = [],
-    ) -> None:
-        response = API._get(url=URL.get_shots_by_episode(episode=episode))
-        return response
+    def fetch_machine_name():
+        return
 
 
 class Publisher(object):
+    """
+    Publisher object that controls the registering of versions and files
+    Args:
+        object (_type_): _description_
+    """
     def __init__(self):
         super().__init__()
         self.versions = List[VersionModel]
