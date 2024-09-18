@@ -195,9 +195,10 @@ class FileModel(BaseModel, CreateModifiedMixin):
     id: int
     version_id: int
     version_type: str
+    file_name: str
     keys: List[PublishKey]
+    last_collected: datetime
     parent: List[Any]
-    path: str
     setting_keyword: str
     start_frame: int
     end_frame: int

@@ -41,6 +41,7 @@ from skyline.models import (
     PublishKey,
 )
 from skyline.models import File as SkylineFile
+from skylinecontent.models import ContentGroup
 from skylinecontent.models import Shot as SkylineShot
 from skylinecontent.models import Asset as SkylineAsset
 from skylinecontent.models import Motion as SkylineMotion
@@ -97,8 +98,8 @@ class _Shot(BaseController[ShotModel]):
         return cls.model.from_dict(result)
         
 
-class Shot(BaseController[ShotModel]):
-    model = SkylineShot
+class Shot(BaseController[ShotModel], ShotModel):
+    model = ShotModel
     
     @classmethod
     def get(
@@ -117,11 +118,41 @@ class Shot(BaseController[ShotModel]):
             sequence__name= sequence,
             name=shot,
         )
+        # shot = cls.model.from_django(cls, result)
         return result
+
+    # def get_tasks(self):
+    #     shot_code = self.name.split("_")
+    #     episode = shot_code[0]
+    #     sequence = shot_code[1]
+    #     shot = shot_code[2]
+        
+    #     # shot = SkylineShot.objects.get(
+    #     #     project__code=self.project.code, 
+    #     #     sequence__episode__name=episode,
+    #     #     sequence__name= sequence,
+    #     #     name=shot,
+    #     # )
 
 
 class Asset(BaseController[AssetModel]):
-    model = SkylineAsset
+    model = AssetModel
+
+    @classmethod
+    def get(
+        cls,
+        name: str,
+        group: str,
+    ) -> AssetModel:
+        initial = name[0]
+        content_group = ContentGroup.objects.get(name=group)
+        result = SkylineAsset.objects.create(
+            name=name,
+            initials=initial,
+            group=content_group,
+        )
+        asset = cls.model.from_django(cls, result)
+        return asset
 
 
 class Motion(BaseController[MotionModel]):
@@ -191,7 +222,7 @@ class _Task(BaseController[TaskModel]):
         return cls.model.from_dict(result)
 
 
-class Task(BaseController[TaskModel]):
+class Task(BaseController[TaskModel], TaskModel):
     model = TaskModel
     
     @classmethod
@@ -201,7 +232,7 @@ class Task(BaseController[TaskModel]):
         content_type: str,
         content_name: str,
         step_code: str,
-    ) -> SkylineTask:  
+    ) -> TaskModel:  
         CONTENT_CLASS_MAP = {
             "shot": Shot,
             "asset": Asset,
@@ -262,6 +293,7 @@ class Version(BaseController[VersionModel], VersionModel):
     @classmethod
     def create(
         cls, 
+        client_version: str,
         task: SkylineTask,
     ) -> VersionModel:
         result = SkylineVersion.objects.create(
@@ -293,8 +325,7 @@ class Version(BaseController[VersionModel], VersionModel):
             version_id=version_id,
             version_type="skylineversion"
         )
-        file = FileModel.from_django(File, result)
-        return file
+        return True
     
     def get_master_file(self):
         return
@@ -357,7 +388,7 @@ class File(BaseController[FileModel], FileModel):
         end_frame:  Optional[str] = None,
         version_type: Optional[str] = "skylineversion",
         version_id: Optional[int] = None,
-    ) -> SkylineFile:
+    ) -> FileModel:
         version_contenttype = ContentType.objects.get(
             app_label="skyline", model=version_type
         )
@@ -366,7 +397,7 @@ class File(BaseController[FileModel], FileModel):
         if key_instances.count() != len(keys):
             raise KeyError(f"{len(keys)} keys given, {key_instances.count()} keys found in DB. confirm the key name being passed in during File creation is correct. ")
 
-        file: SkylineFile = SkylineFile.objects.create(
+        result: SkylineFile = SkylineFile.objects.create(
             file_name=file_name,
             parent=parent,
             setting_keyword=setting_keyword,
@@ -375,6 +406,7 @@ class File(BaseController[FileModel], FileModel):
             start_frame=start_frame,
             end_frame=end_frame,
         )
-        file.keys.set(key_instances)
-        file.save()
+        result.keys.set(key_instances)
+        result.save()
+        file = cls.from_django(cls, result)
         return file
