@@ -26,6 +26,7 @@ from lemonsky.data.hrm.models import (
 class ProjectModel(BaseModel):
     id: int
     code: str
+    name: str
     full_name: str
     is_secret: bool
     shotgun_project_id: int | None
@@ -100,7 +101,7 @@ class SequenceModel(ContentMixin, BaseModel):
 
 @dataclass
 class ShotModel(ContentMixin, BaseModel):
-    shot_code: str
+    name: str
     sequence: SequenceModel
     group: ContentGroupModel
     outsource: bool

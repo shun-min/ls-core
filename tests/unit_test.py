@@ -21,17 +21,17 @@ project = Project.get(code="TS")
 
 shot_a = _Shot.get(
     project_code=project.code, 
-    name="101_01_001"
+    name="101_01_001",
 )
 shot_b = Shot.get(
     project_code=project.code, 
-    name="101_01_001"
+    name="101_01_001",
 )
 
 task = Task.get(
     project_code=project.code, 
     content_type="shot", 
-    content_name=shot_a.shot_code, 
+    content_name=shot_b.name, 
     step_code="COMP",
 )
 print(task)

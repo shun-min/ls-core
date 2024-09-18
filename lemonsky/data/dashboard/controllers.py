@@ -10,7 +10,6 @@ from typing import Any, Dict, Generic, List, Optional, TypeVar
 import django
 
 from lemonsky.common.models import BaseModel
-from lemonsky.data.dashboard.constants import CONTENT_TYPE_MAP
 from lemonsky.data.dashboard.models import (
     ProjectModel,
     AssetModel,
@@ -70,12 +69,13 @@ class _Project(BaseController[ProjectModel]):
         return projects
 
 
-class Project(BaseController[ProjectModel]):
-    model=SkylineProject
+class Project(BaseController[ProjectModel], ProjectModel):
+    model=ProjectModel
 
     @classmethod
     def get(cls, code: str) -> ProjectModel:
-        return SkylineProject.objects.get(code=code)
+        result = SkylineProject.objects.get(code=code)
+        return cls.model.from_django(cls, result)
 
 
 class _Shot(BaseController[ShotModel]):
@@ -91,7 +91,7 @@ class _Shot(BaseController[ShotModel]):
         project = Project.get(code=project_code)
         result = _api._get(
             url=URL.get_shot(
-                shot_code=name, 
+                name=name, 
                 project_id=project.id
             )
         )[0]
@@ -108,18 +108,11 @@ class Shot(BaseController[ShotModel], ShotModel):
         name: str,
     ) -> ShotModel:
         assert project_code, "Must pass in project code. "
-        shot_code = name.split("_")
-        episode = shot_code[0]
-        sequence = shot_code[1]
-        shot = shot_code[2]
         result = SkylineShot.objects.get(
-            project__code=project_code, 
-            sequence__episode__name=episode,
-            sequence__name= sequence,
-            name=shot,
+            project__code=project_code,
+            name=name,
         )
-        # shot = cls.model.from_django(cls, result)
-        return result
+        return cls.model.from_django(cls, result)
 
     # def get_tasks(self):
     #     shot_code = self.name.split("_")
@@ -240,16 +233,16 @@ class Task(BaseController[TaskModel], TaskModel):
         }
         
         content_class = CONTENT_CLASS_MAP[content_type]
-        content_type_id = CONTENT_TYPE_MAP[content_type]
+        c = ContentType.objects.get(model=content_type)
         content = content_class.get(
             project_code=project_code, 
-            name=content_name
+            name=content_name,
         )
-        result = SkylineTask.objects.get(
-            project_content_type=content_type_id,
+        result = SkylineTask.objects.filter(
+            project_content_type=c.id,
             project_content_reference_id=content.id,
             step__code=step_code,
-        )
+        )[0]
 
         if not result:
             return []
