@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Union
 
 from lemonsky.common.models import BaseModel
 
@@ -7,9 +8,9 @@ from lemonsky.common.models import BaseModel
 class ClientModel():
     id: int
     name: str
-    phone: str | None
-    address: str | None
-    email: str | None
+    phone: Union[str, None]
+    address: Union[str, None]
+    email: Union[str, None]
     slug: str
 
 

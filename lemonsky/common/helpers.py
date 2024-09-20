@@ -8,6 +8,7 @@ class Utils():
         try:
             with open(path, "r") as x:
                 json_obj = json.load(x)
+                return json_obj
         except Exception as e:
             print(e)
-        return json_obj
+            return None

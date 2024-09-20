@@ -1,11 +1,9 @@
 from datetime import datetime
 import os
 import sys
-import requests
 
 from collections.abc import Mapping
-from pydantic_core import Url
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
 import django
 
@@ -144,8 +142,7 @@ class Asset(BaseController[AssetModel]):
             initials=initial,
             group=content_group,
         )
-        asset = cls.model.from_django(cls, result)
-        return asset
+        return cls.model.from_django(cls, result)
 
 
 class Motion(BaseController[MotionModel]):
@@ -259,9 +256,9 @@ class Task(BaseController[TaskModel], TaskModel):
 
     def create_version(
         self,
-        task: TaskModel,
+        client_version: str,
     ):
-        return Version.create(task_id=task.id)
+        return Version.create(task_id=self.id, client_version=client_version)
 
 
 
@@ -295,8 +292,7 @@ class Version(BaseController[VersionModel], VersionModel):
             client_version=2,
             publish_time=datetime.now(),
         )
-        version = cls.model.from_django(cls, result)
-        return version
+        return cls.model.from_django(cls, result)
     
     def add_file(
         self,
@@ -320,14 +316,20 @@ class Version(BaseController[VersionModel], VersionModel):
         )
         return True
     
-    def get_master_file(self):
-        return
-
-    def get_task_file(self):
-        return
-
-    def get_internal_file(self):
-        return
+    def get_files(
+        self, 
+        keys: Optional[List[str]] = [],
+        parent: Optional[int] = None,
+        setting_keyword: Optional[str] = "",
+        version_id: Optional[int] = None,
+    ):
+        result = File.get(
+            keys=keys,
+            parent=parent,
+            setting_keyword=setting_keyword,
+            version_id=version_id,
+        )
+        return result
 
     def publish(self,):
         return
@@ -343,7 +345,7 @@ class _File(BaseController[FileModel]):
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
         version_id: Optional[int] = None,
-    ) -> Dict[str, str | int | Dict[str, str]]:
+    ) -> Dict[str, Union[str, int, Dict[str, str]]]:
         response = _api._get(url=URL.file(version_id=version_id))
         entities = cls.model.from_dict(response.json())
         return entities
@@ -360,14 +362,15 @@ class File(BaseController[FileModel], FileModel):
         setting_keyword: Optional[str] = "",
         version_type: Optional[str] = "skylineversion",
         version_id: Optional[int] = None,
-    ) -> List[SkylineFile]:
-        files = File.objects.filter(
+    ) -> List[FileModel]:
+        results = File.objects.filter(
             keys=keys, 
             parent=parent,
             setting_keyword=setting_keyword,
             version_type=version_type,
             version_id=version_id,
         )
+        files = [cls.model.from_django(cls, r) for r in results]
         return files
 
     @classmethod

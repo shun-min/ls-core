@@ -1,7 +1,7 @@
-from enum import StrEnum
+# from enum import StrEnum
 
 
-class ContentTypeEnums(StrEnum):
+class ContentTypeEnums():
     Season = "season"
     Episode = "episode"
     Sequence = "sequence"
@@ -21,7 +21,7 @@ class ContentTypeEnums(StrEnum):
         return labels[self]
 
 
-class ContentCategory(StrEnum):
+class ContentCategory():
     Marketing = "Marketing"
     Concept = "Concept"
     Graphics = "Graphics"
@@ -30,7 +30,7 @@ class ContentCategory(StrEnum):
     Animation = "Animation"
 
 
-class ContentCategoryType(StrEnum):
+class ContentCategoryType():
     Poster = "Poster"
     BreakdownVideo = "BreakdownVideo"
     KeyArt = "KeyArt"
@@ -56,7 +56,7 @@ class ContentCategoryType(StrEnum):
     LineUp = "LineUp"
 
 
-class ProjectDivision(StrEnum):
+class ProjectDivision():
     ANIMATION = "animation"
     GAME = "game"
 
@@ -68,7 +68,7 @@ class ProjectDivision(StrEnum):
         return labels[self]
 
 
-class ProjectStage(StrEnum):
+class ProjectStage():
     NEW = "new"
     INPROGRESS = "inprogress"
     ONHOLD = "onhold"
@@ -88,7 +88,7 @@ class ProjectStage(StrEnum):
         return labels[self]
 
 
-class ProjectType(StrEnum):
+class ProjectType():
     ADVERTISEMENT = "advertisement"
     GAME = "game"
     GAME_ANIM = "game_animation"
@@ -108,7 +108,7 @@ class ProjectType(StrEnum):
         return labels[self]
 
 
-class TaskPriority(StrEnum):
+class TaskPriority():
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -122,7 +122,7 @@ class TaskPriority(StrEnum):
         return labels[self]
 
 
-class TaskStatus(StrEnum):
+class TaskStatus():
     NEW = "new"
     WIP = "wip"
     PUB = "pub"

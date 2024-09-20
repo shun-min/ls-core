@@ -16,13 +16,13 @@ from lemonsky.data.dashboard.controllers import (
 # option to get everything by ID
 
 # a = Content.get(project_code="TS", type="shot", name="101_01_001")
-project = _Project.get(code="TS")
+# project = _Project.get(code="TS")
 project = Project.get(code="TS")
 
-shot_a = _Shot.get(
-    project_code=project.code, 
-    name="101_01_001",
-)
+# shot_a = _Shot.get(
+#     project_code=project.code, 
+#     name="101_01_001",
+# )
 shot_b = Shot.get(
     project_code=project.code, 
     name="101_01_001",

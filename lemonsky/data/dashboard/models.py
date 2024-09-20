@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from .enums import (
     ContentTypeEnums,
@@ -26,30 +26,33 @@ from lemonsky.data.hrm.models import (
 class ProjectModel(BaseModel):
     id: int
     code: str
-    name: str
+    display_name: str
     full_name: str
     is_secret: bool
-    shotgun_project_id: int | None
+    shotgun_project_id: Union[int, None]
     production_path: str
     division: ProjectDivision
     stage: ProjectStage
     type: ProjectType
-    publish_path: str | None
-    version_path: str | None
-    workfiles_path: str | None
-    poster: str | None
+    frame_rate: int
+    content_types: List[str]
+    publish_path: Union[str, None]
+    hierarchy: dict[str, str]
+    version_path: Union[str, None]
+    workfiles_path: Union[str, None]
+    poster: Union[str, None]
     description: str
-    client: LeftToRight[ClientModel | SelfURLModel] | None
+    client: Union[LeftToRight[Union[ClientModel, SelfURLModel]], None]
     production_path: str
-    backup_path: str | None
-    project_file_prefix: str | None
+    backup_path: Union[str, None]
+    project_file_prefix: Union[str, None]
     start_date: date
     end_date: date
     creation_date: datetime
     modified_date: datetime
-    created_by: LeftToRight[EmployeeModel | SelfURLModel]
-    init_file_path: str | None
-    working_file_path: str | None
+    created_by: LeftToRight[Union[EmployeeModel, SelfURLModel]]
+    init_file_path: Union[str, None]
+    working_file_path: Union[str, None]
 
 
 @dataclass
@@ -60,20 +63,20 @@ class CreateModifiedMixin:
 
 @dataclass
 class FlowIdTypeMixin:
-    flow_id: int | None
-    flow_type: str | None
+    flow_id: Union[int, None]
+    flow_type: Union[str, None]
 
 
 @dataclass
 class ContentMixin(CreateModifiedMixin, FlowIdTypeMixin):
     id: int
-    project: LeftToRight[ProjectModel | SelfURLModel]
+    project: LeftToRight[Union[ProjectModel, SelfURLModel]]
     name: str
     description: str
     outsource: bool
-    created_by: LeftToRight[EmployeeModel | SelfURLModel]
-    modified_by: LeftToRight[EmployeeModel | SelfURLModel]
-    locked_by: LeftToRight[EmployeeModel | SelfURLModel] | None
+    created_by: LeftToRight[Union[EmployeeModel, SelfURLModel]]
+    modified_by: LeftToRight[Union[EmployeeModel, SelfURLModel]]
+    locked_by: Union[LeftToRight[Union[EmployeeModel, SelfURLModel]], None]
 
 
 @dataclass
@@ -96,7 +99,7 @@ class EpisodeModel(ContentMixin, BaseModel):
 
 @dataclass
 class SequenceModel(ContentMixin, BaseModel):
-    episode: EpisodeModel | None
+    episode: Union[EpisodeModel, None]
 
 
 @dataclass
@@ -111,30 +114,30 @@ class ShotModel(ContentMixin, BaseModel):
 class AssetModel(ContentMixin, BaseModel):
     id: int
     name: str
-    shot: ShotModel | None
-    slot: int | None
+    shot: Union[ShotModel, None]
+    slot: Union[int, None]
     group: ContentGroupModel
     initials: str
-    batch: str | None
+    batch: Union[str, None]
 
 
 @dataclass
 class MotionModel(ContentMixin, BaseModel):
     id: int
-    asset: AssetModel | None
+    asset: Union[AssetModel, None]
     group: ContentGroupModel
-    batch: str | None
-    package: str | None
-    department: str | None
-    typeskin: str | None
-    motion_class: str | None
-    subtype: str | None
-    direction: str | None
-    motion_variant: str | None
-    lod: str | None
+    batch: Union[str, None]
+    package: Union[str, None]
+    department: Union[str, None]
+    typeskin: Union[str, None]
+    motion_class: Union[str, None]
+    subtype: Union[str, None]
+    direction: Union[str, None]
+    motion_variant: Union[str, None]
+    lod: Union[str, None]
 
 
-ContentState = ShotModel | AssetModel | MotionModel
+ContentState = ShotModel, AssetModel, MotionModel
 
 
 @dataclass
@@ -144,7 +147,7 @@ class StepModel(BaseModel):
     name: str
     full_name: str
     description: str
-    departments: list[LeftToRight[DepartmentModel | SelfURLModel]]
+    departments: list[LeftToRight[Union[DepartmentModel, SelfURLModel]]]
 
 
 @dataclass
@@ -152,21 +155,21 @@ class TaskModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
     id: int
     draft: bool
     project_content_type: ContentTypeEnums
-    project_content: LeftToRight[ContentState | SelfURLModel]
-    step: LeftToRight[StepModel | SelfURLModel]
+    project_content: LeftToRight[Union[Any, SelfURLModel]]
+    step: LeftToRight[Union[StepModel, SelfURLModel]]
     status: TaskStatus
     priority: TaskPriority
     description: str
     client_version: int
     created_by: EmployeeModel
-    assign_by: EmployeeModel | None
-    assign_to: EmployeeModel | None
-    assign_date: datetime | None
+    assign_by: Union[EmployeeModel, None]
+    assign_to: Union[EmployeeModel, None]
+    assign_date: Union[datetime, None]
     start_date: date
     end_date: date
     completion_percent: float
-    actual_start_date: datetime | None
-    actual_end_date: datetime | None
+    actual_start_date: Union[datetime, None]
+    actual_end_date: Union[datetime, None]
     is_master: bool
 
 
@@ -176,12 +179,12 @@ class VersionModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
     task: TaskModel
     client_version: int
     internal_version: int
-    checkout_by: EmployeeModel | None
-    publish_time: datetime | None
-    source_file_path: str | None
-    publish_by: EmployeeModel | None
-    publish_comment: str | None
-    client_feedback: str | None
+    checkout_by: Union[EmployeeModel, None]
+    publish_time: Union[datetime, None]
+    source_file_path: Union[str, None]
+    publish_by: Union[EmployeeModel, None]
+    publish_comment: Union[str, None]
+    client_feedback: Union[str, None]
     status: TaskStatus
 
 
