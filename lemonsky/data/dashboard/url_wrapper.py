@@ -1,7 +1,7 @@
 import json
-# import requests
+import requests
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from lemonsky.common.constants import (
     METADATA_PATH,
@@ -82,9 +82,30 @@ class URL:
     @classmethod
     def file(
         cls,
-        version_id: int
+        keys: Optional[List[str]] = [],
+        parent: Optional[int] = None,
+        setting_keyword: Optional[str] = "",
+        version_type: Optional[str] = "skylineversion",
+        version_id: Optional[int] = None,
     ) -> str:
-        return rf"skyline/files?version_id={version_id}"
+        full_url = rf"skyline/files?"
+        if version_id:
+            full_url = full_url + f"version_type={version_type}&version_id={version_id}&"
+
+        if keys:
+            key_params = ",".join(keys)
+            full_url = full_url + f"keys={key_params}&"
+
+        if setting_keyword:
+            full_url = full_url + f"setting_keyword={setting_keyword}&"
+
+        if parent:
+            full_url = full_url + f"parent={parent}"
+
+        if full_url.endswith("&"):
+            full_url = full_url.strip("&")
+        
+        return full_url
 
 class APIConfig(Singleton):
     def __init__(self) -> None:

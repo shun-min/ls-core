@@ -189,9 +189,24 @@ class VersionModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
 
 
 @dataclass
+class PreviewVersionModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
+    id: int
+    parent: Union[VersionModel, None]
+    client_version: int
+    internal_version: int
+    checkout_by: Union[EmployeeModel, None]
+    publish_time: Union[datetime, None]
+    source_file_path: Union[str, None]
+    publish_by: Union[EmployeeModel, None]
+    publish_comment: Union[str, None]
+    client_feedback: Union[str, None]
+    status: TaskStatus
+
+
+@dataclass
 class PublishKey(BaseModel):
     id: int
-    name: int
+    name: str
 
 
 @dataclass
@@ -202,7 +217,7 @@ class FileModel(BaseModel, CreateModifiedMixin):
     file_name: str
     keys: List[PublishKey]
     last_collected: datetime
-    parent: List[Any]
+    parent: LeftToRight[Any]
     setting_keyword: str
     start_frame: int
     end_frame: int

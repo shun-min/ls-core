@@ -36,7 +36,8 @@ task = Task.get(
 )
 print(task)
 
-version = Version.create(client_version=2, task=task)
+# version = Version.create(client_version=2, task=task)
+version = Version.get(task=task, internal_version=2)[0]
 print(version)
 
 # file1 = File.create(
@@ -63,9 +64,13 @@ print(version)
 
 success = version.add_file(
     keys = ["texture", "background"],
+    setting_keyword="camera",
     file_name=r"TS_101_01_001_Background_0298.exr",
     start_frame=298,
     end_frame=298,
 )
 print(version, success)
+
+f = version.get_files(keys=["texture", "background"])
+print(f)
 # version.publish()

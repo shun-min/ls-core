@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import requests
 import sys
 
 from collections.abc import Mapping
@@ -16,6 +17,7 @@ from lemonsky.data.dashboard.models import (
     StepModel,
     TaskModel,
     VersionModel,
+    PreviewVersionModel,
     FileModel,
     ContentState,
     ContentTypeEnums,
@@ -103,9 +105,11 @@ class Shot(BaseController[ShotModel], ShotModel):
     def get(
         cls, 
         project_code: str,
-        name: str,
+        name: Union[int, str],
     ) -> ShotModel:
         assert project_code, "Must pass in project code. "
+        if isinstance(name, int):
+            name = str(name)
         result = SkylineShot.objects.get(
             project__code=project_code,
             name=name,
@@ -261,24 +265,30 @@ class Task(BaseController[TaskModel], TaskModel):
         return Version.create(task_id=self.id, client_version=client_version)
 
 
-
 class Version(BaseController[VersionModel], VersionModel):
     model = VersionModel
         
     @classmethod
     def get(
         cls, 
+        internal_version: Optional[int] = None,
+        client_version: Optional[int] = None,
         id: Optional[int] = None,
-        step_name: Optional[str] = None,
         task: Optional[TaskModel] = None,
-    ) -> VersionModel:
+    ) -> List[VersionModel]:
         if id:
-            return SkylineVersion.objects.get(id=id)
-        if task:
-            return SkylineVersion.objects.get(
-                task__project_content_reference_id= task.id,
-                task__step__name=step_name,
+            result = SkylineVersion.objects.filter(id=id)
+        if task and internal_version:
+            result = SkylineVersion.objects.filter(
+                task__id= task.id,
+                task__step__name=task.step.name,
+                internal_version=internal_version,
             )
+        versions = [
+            cls.model.from_django(cls, _)
+            for _ in result
+        ]
+        return versions
 
     @classmethod
     def create(
@@ -302,18 +312,21 @@ class Version(BaseController[VersionModel], VersionModel):
         setting_keyword: Optional[str] = "",
         start_frame:  Optional[str] = None,
         end_frame:  Optional[str] = None,
-    ):
-        version_id = self.id
-        result = File.create(
-            keys = keys,
-            file_name=file_name,
-            parent=parent,
-            setting_keyword=setting_keyword,
-            start_frame=start_frame,
-            end_frame=end_frame,
-            version_id=version_id,
-            version_type="skylineversion"
-        )
+    ) -> bool:
+        try:
+            result = File.create(
+                keys = keys,
+                file_name=file_name,
+                parent=parent,
+                setting_keyword=setting_keyword,
+                start_frame=start_frame,
+                end_frame=end_frame,
+                version=self,
+                version_type="skylineversion"
+            )
+        except Exception as e:
+            print(f"File not registered. \n{e}")
+            return False
         return True
     
     def get_files(
@@ -321,19 +334,26 @@ class Version(BaseController[VersionModel], VersionModel):
         keys: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
-        version_id: Optional[int] = None,
     ):
         result = File.get(
             keys=keys,
             parent=parent,
             setting_keyword=setting_keyword,
-            version_id=version_id,
+            version_id=self.id,
+            version_type="publish",  # TODO: handle this
         )
         return result
 
     def publish(self,):
         return
 
+class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
+    model = PreviewVersionModel
+
+    @classmethod
+    def get():
+        return
+    
 
 class _File(BaseController[FileModel]):
     model = FileModel
@@ -353,24 +373,29 @@ class _File(BaseController[FileModel]):
 
 class File(BaseController[FileModel], FileModel):
     model = FileModel
-    
+
+    @classmethod
+    def filterFilesWithKeys(cls, keys: List[str]):
+        queryset = SkylineFile.objects.all()
+        while len(keys) > 0:
+            k = PublishKey.objects.get(name=keys[-1])
+            queryset = queryset.filter(keys=k.id)
+            keys.pop(-1)
+        return queryset
+
     @classmethod
     def get(
         cls,
         keys: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
-        version_type: Optional[str] = "skylineversion",
+        version_type: Optional[str] = "publish",
         version_id: Optional[int] = None,
     ) -> List[FileModel]:
-        results = File.objects.filter(
-            keys=keys, 
-            parent=parent,
-            setting_keyword=setting_keyword,
-            version_type=version_type,
-            version_id=version_id,
-        )
+
+        results = cls.filterFilesWithKeys(keys)
         files = [cls.model.from_django(cls, r) for r in results]
+
         return files
 
     @classmethod
@@ -383,7 +408,7 @@ class File(BaseController[FileModel], FileModel):
         start_frame:  Optional[str] = None,
         end_frame:  Optional[str] = None,
         version_type: Optional[str] = "skylineversion",
-        version_id: Optional[int] = None,
+        version: Optional[VersionModel] = None,
     ) -> FileModel:
         version_contenttype = ContentType.objects.get(
             app_label="skyline", model=version_type
@@ -398,7 +423,7 @@ class File(BaseController[FileModel], FileModel):
             parent=parent,
             setting_keyword=setting_keyword,
             version_type=version_contenttype,
-            version_id=version_id,
+            version_id=version.id,
             start_frame=start_frame,
             end_frame=end_frame,
         )
