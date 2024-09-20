@@ -1,9 +1,9 @@
 
 from lemonsky.data.dashboard.controllers import (
-    _Project,
+    # _Project,
     Project,
     Content,
-    _Shot,
+    # _Shot,
     Shot,
     Task,
     Version,

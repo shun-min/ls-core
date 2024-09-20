@@ -46,7 +46,7 @@ from skylinecontent.models import Asset as SkylineAsset
 from skylinecontent.models import Motion as SkylineMotion
 
 
-_api =  APIConfig()
+# _api =  APIConfig()
 T = TypeVar("T")
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -55,18 +55,18 @@ class BaseController(Generic[ModelT]):
     model: type[ModelT]
 
 
-class _Project(BaseController[ProjectModel]):
-    model = ProjectModel
+# class _Project(BaseController[ProjectModel]):
+#     model = ProjectModel
 
-    @classmethod
-    def get(cls, code: str) -> ProjectModel:
-        result = _api._get(url=URL.get_project(code=code))[0]
-        return cls.model.from_dict(result)
+#     @classmethod
+#     def get(cls, code: str) -> ProjectModel:
+#         result = _api._get(url=URL.get_project(code=code))[0]
+#         return cls.model.from_dict(result)
 
-    @classmethod
-    def get_assigned_projects(cls):
-        projects = _api._get(url=URL.assigned_projects)
-        return projects
+#     @classmethod
+#     def get_assigned_projects(cls):
+#         projects = _api._get(url=URL.assigned_projects)
+#         return projects
 
 
 class Project(BaseController[ProjectModel], ProjectModel):
@@ -78,24 +78,24 @@ class Project(BaseController[ProjectModel], ProjectModel):
         return cls.model.from_django(cls, result)
 
 
-class _Shot(BaseController[ShotModel]):
-    model = ShotModel
+# class _Shot(BaseController[ShotModel]):
+#     model = ShotModel
     
-    @classmethod
-    def get(
-        cls, 
-        name: str,
-        project_code: str
-    ) -> ShotModel:
-        assert project_code, "Must pass in project code. "
-        project = Project.get(code=project_code)
-        result = _api._get(
-            url=URL.get_shot(
-                name=name, 
-                project_id=project.id
-            )
-        )[0]
-        return cls.model.from_dict(result)
+#     @classmethod
+#     def get(
+#         cls, 
+#         name: str,
+#         project_code: str
+#     ) -> ShotModel:
+#         assert project_code, "Must pass in project code. "
+#         project = Project.get(code=project_code)
+#         result = _api._get(
+#             url=URL.get_shot(
+#                 name=name, 
+#                 project_id=project.id
+#             )
+#         )[0]
+#         return cls.model.from_dict(result)
         
 
 class Shot(BaseController[ShotModel], ShotModel):
@@ -189,31 +189,31 @@ class Step(BaseController[ProjectModel]):
         return cls.model.from_dict(result)
 
 
-class _Task(BaseController[TaskModel]):
-    model = TaskModel
+# class _Task(BaseController[TaskModel]):
+#     model = TaskModel
 
-    @classmethod
-    def get(
-        cls,
-        project_code: str,
-        content_type: str,
-        content_name: str,
-        step_code: str,
-    ):  
-        step = Step.get(code=step_code)
-        content = Content.get(
-            project_code=project_code,
-            type=content_type,
-            name=content_name,
-        )
-        result = _api._get(
-            url=URL.get_task(
-                content_type=content_type,
-                content_id=content.id,
-                step_id=step.id,
-            )
-        )[0]
-        return cls.model.from_dict(result)
+#     @classmethod
+#     def get(
+#         cls,
+#         project_code: str,
+#         content_type: str,
+#         content_name: str,
+#         step_code: str,
+#     ):  
+#         step = Step.get(code=step_code)
+#         content = Content.get(
+#             project_code=project_code,
+#             type=content_type,
+#             name=content_name,
+#         )
+#         result = _api._get(
+#             url=URL.get_task(
+#                 content_type=content_type,
+#                 content_id=content.id,
+#                 step_id=step.id,
+#             )
+#         )[0]
+#         return cls.model.from_dict(result)
 
 
 class Task(BaseController[TaskModel], TaskModel):
@@ -355,20 +355,20 @@ class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
         return
     
 
-class _File(BaseController[FileModel]):
-    model = FileModel
+# class _File(BaseController[FileModel]):
+#     model = FileModel
     
-    @classmethod
-    def get(
-        cls,
-        keys: Optional[List[str]] = [],
-        parent: Optional[int] = None,
-        setting_keyword: Optional[str] = "",
-        version_id: Optional[int] = None,
-    ) -> Dict[str, Union[str, int, Dict[str, str]]]:
-        response = _api._get(url=URL.file(version_id=version_id))
-        entities = cls.model.from_dict(response.json())
-        return entities
+#     @classmethod
+#     def get(
+#         cls,
+#         keys: Optional[List[str]] = [],
+#         parent: Optional[int] = None,
+#         setting_keyword: Optional[str] = "",
+#         version_id: Optional[int] = None,
+#     ) -> Dict[str, Union[str, int, Dict[str, str]]]:
+#         response = _api._get(url=URL.file(version_id=version_id))
+#         entities = cls.model.from_dict(response.json())
+#         return entities
 
 
 class File(BaseController[FileModel], FileModel):
