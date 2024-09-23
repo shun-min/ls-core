@@ -37,8 +37,8 @@ class URL:
         cls,
         code: str,
     ) -> str:
-        return rf"skyline/steps?code={code}"      
-    
+        return rf"skyline/steps?code={code}"
+
     @classmethod
     def get_shots_by_episode(
         cls,
@@ -71,7 +71,7 @@ class URL:
         step_id: int,
     ) -> str:
         return rf"skyline/tasks?project_content_type={content_type}&content_id={content_id}&step_id={step_id}"
-    
+
     @classmethod
     def get_version(
         cls,
@@ -104,7 +104,7 @@ class URL:
 
         if full_url.endswith("&"):
             full_url = full_url.strip("&")
-        
+
         return full_url
 
 class APIConfig(Singleton):
@@ -127,7 +127,7 @@ class APIConfig(Singleton):
 
     def _set_version(self):
         return "api/v1"
-    
+
     def _set_header(self)-> Dict[str, str]:
         settings_path = RESOURCES_ROOT / "settings.json"
         json_obj = Utils.json_load(path=settings_path)

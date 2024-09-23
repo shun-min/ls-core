@@ -19,7 +19,7 @@ class DepartmentModel():
     id: int
     department: str
 
-    
+
 @dataclass
 class EmployeeModel(BaseModel):
     id: int

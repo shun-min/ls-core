@@ -1,4 +1,7 @@
+import os, sys
 from typing import Any, Dict, List, Optional
+
+import django
 
 from ..data.dashboard.models import (
     ProjectModel,
@@ -6,28 +9,22 @@ from ..data.dashboard.models import (
     VersionModel,
 )
 
-from ..data.dashboard.url_wrapper import (
-    API,
-    URL,
-)
-from ..data.dashboard.controllers import (
-    Project,
-)
 
 class ToolContext():
     def __init__(self):
         super().__init__()
-        self.assigned_projects: List[ProjectModel] = []
-        self.active_project: ProjectModel = None
-        self.active_task: TaskModel = None
+        self.init_context()
 
-    def init_context():
+    def init_context(self) -> None:
         """
         Init django LemonCORE-Web context,
         fetch current task, current user, PC name etc
-        
+
         """
-        return
+        sys.path.append(r"N:\pipeline\Tech_team\repo\LemonCORE-Web")
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lemoncore.settings')
+        django.setup()
+        print("Initialized django ORM")
 
     def fetch_task_context():
         return

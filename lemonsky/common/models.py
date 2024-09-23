@@ -46,7 +46,7 @@ class BaseModel:
             _type_: _description_
         """
         fields = list(obj._meta.fields + obj._meta.many_to_many)
-        _ = {   
+        _ = {
             i.name: getattr(obj, i.name) for i in fields
         }
         return api_class(**_)

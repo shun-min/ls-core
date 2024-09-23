@@ -204,7 +204,7 @@ class PreviewVersionModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
 
 
 @dataclass
-class PublishKey(BaseModel):
+class Tag(BaseModel):
     id: int
     name: str
 
@@ -215,7 +215,7 @@ class FileModel(BaseModel, CreateModifiedMixin):
     version_id: int
     version_type: str
     file_name: str
-    keys: List[PublishKey]
+    keys: List[Tag]
     last_collected: datetime
     parent: LeftToRight[Any]
     setting_keyword: str

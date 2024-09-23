@@ -27,17 +27,13 @@ from .url_wrapper import (
     URL,
 )
 
-sys.path.append(r"D:\projects\work\LemonCORE-Docker\django\lemoncore")
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lemoncore.settings')
-django.setup()
-
 from django.contrib.contenttypes.models import ContentType
 from skyline.models import (
     SkylineProject,
     SkylineTask,
     SkylineVersion,
     SkylineVersionPreview,
-    PublishKey,
+    Tag,
 )
 from skyline.models import File as SkylineFile
 from skylinecontent.models import ContentGroup
@@ -80,10 +76,10 @@ class Project(BaseController[ProjectModel], ProjectModel):
 
 # class _Shot(BaseController[ShotModel]):
 #     model = ShotModel
-    
+
 #     @classmethod
 #     def get(
-#         cls, 
+#         cls,
 #         name: str,
 #         project_code: str
 #     ) -> ShotModel:
@@ -91,19 +87,19 @@ class Project(BaseController[ProjectModel], ProjectModel):
 #         project = Project.get(code=project_code)
 #         result = _api._get(
 #             url=URL.get_shot(
-#                 name=name, 
+#                 name=name,
 #                 project_id=project.id
 #             )
 #         )[0]
 #         return cls.model.from_dict(result)
-        
+
 
 class Shot(BaseController[ShotModel], ShotModel):
     model = ShotModel
-    
+
     @classmethod
     def get(
-        cls, 
+        cls,
         project_code: str,
         name: Union[int, str],
     ) -> ShotModel:
@@ -121,9 +117,9 @@ class Shot(BaseController[ShotModel], ShotModel):
     #     episode = shot_code[0]
     #     sequence = shot_code[1]
     #     shot = shot_code[2]
-        
+
     #     # shot = SkylineShot.objects.get(
-    #     #     project__code=self.project.code, 
+    #     #     project__code=self.project.code,
     #     #     sequence__episode__name=episode,
     #     #     sequence__name= sequence,
     #     #     name=shot,
@@ -199,7 +195,7 @@ class Step(BaseController[ProjectModel]):
 #         content_type: str,
 #         content_name: str,
 #         step_code: str,
-#     ):  
+#     ):
 #         step = Step.get(code=step_code)
 #         content = Content.get(
 #             project_code=project_code,
@@ -218,7 +214,7 @@ class Step(BaseController[ProjectModel]):
 
 class Task(BaseController[TaskModel], TaskModel):
     model = TaskModel
-    
+
     @classmethod
     def get(
         cls,
@@ -226,17 +222,17 @@ class Task(BaseController[TaskModel], TaskModel):
         content_type: str,
         content_name: str,
         step_code: str,
-    ) -> TaskModel:  
+    ) -> TaskModel:
         CONTENT_CLASS_MAP = {
             "shot": Shot,
             "asset": Asset,
             "motion": Motion,
         }
-        
+
         content_class = CONTENT_CLASS_MAP[content_type]
         c = ContentType.objects.get(model=content_type)
         content = content_class.get(
-            project_code=project_code, 
+            project_code=project_code,
             name=content_name,
         )
         result = SkylineTask.objects.filter(
@@ -267,10 +263,10 @@ class Task(BaseController[TaskModel], TaskModel):
 
 class Version(BaseController[VersionModel], VersionModel):
     model = VersionModel
-        
+
     @classmethod
     def get(
-        cls, 
+        cls,
         internal_version: Optional[int] = None,
         client_version: Optional[int] = None,
         id: Optional[int] = None,
@@ -292,7 +288,7 @@ class Version(BaseController[VersionModel], VersionModel):
 
     @classmethod
     def create(
-        cls, 
+        cls,
         client_version: str,
         task: SkylineTask,
     ) -> VersionModel:
@@ -303,7 +299,7 @@ class Version(BaseController[VersionModel], VersionModel):
             publish_time=datetime.now(),
         )
         return cls.model.from_django(cls, result)
-    
+
     def add_file(
         self,
         file_name: str,
@@ -328,9 +324,9 @@ class Version(BaseController[VersionModel], VersionModel):
             print(f"File not registered. \n{e}")
             return False
         return True
-    
+
     def get_files(
-        self, 
+        self,
         keys: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
@@ -353,11 +349,11 @@ class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
     @classmethod
     def get():
         return
-    
+
 
 # class _File(BaseController[FileModel]):
 #     model = FileModel
-    
+
 #     @classmethod
 #     def get(
 #         cls,
