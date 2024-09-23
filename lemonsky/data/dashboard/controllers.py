@@ -19,6 +19,7 @@ from lemonsky.data.dashboard.models import (
     VersionModel,
     PreviewVersionModel,
     FileModel,
+    TagModel,
     ContentState,
     ContentTypeEnums,
 )
@@ -302,8 +303,8 @@ class Version(BaseController[VersionModel], VersionModel):
 
     def add_file(
         self,
-        file_name: str,
-        keys: Optional[List[str]] = [],
+        name: str,
+        tags: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
         start_frame:  Optional[str] = None,
@@ -311,8 +312,8 @@ class Version(BaseController[VersionModel], VersionModel):
     ) -> bool:
         try:
             result = File.create(
-                keys = keys,
-                file_name=file_name,
+                tags = tags,
+                name=name,
                 parent=parent,
                 setting_keyword=setting_keyword,
                 start_frame=start_frame,
@@ -327,12 +328,12 @@ class Version(BaseController[VersionModel], VersionModel):
 
     def get_files(
         self,
-        keys: Optional[List[str]] = [],
+        tags: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
     ):
         result = File.get(
-            keys=keys,
+            tags=tags,
             parent=parent,
             setting_keyword=setting_keyword,
             version_id=self.id,
@@ -357,7 +358,7 @@ class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
 #     @classmethod
 #     def get(
 #         cls,
-#         keys: Optional[List[str]] = [],
+#         tags: Optional[List[str]] = [],
 #         parent: Optional[int] = None,
 #         setting_keyword: Optional[str] = "",
 #         version_id: Optional[int] = None,
@@ -371,25 +372,25 @@ class File(BaseController[FileModel], FileModel):
     model = FileModel
 
     @classmethod
-    def filterFilesWithKeys(cls, keys: List[str]):
+    def filterFilesWithTags(cls, tags: List[str]):
         queryset = SkylineFile.objects.all()
-        while len(keys) > 0:
-            k = PublishKey.objects.get(name=keys[-1])
-            queryset = queryset.filter(keys=k.id)
-            keys.pop(-1)
+        while len(tags) > 0:
+            k = Tag.objects.get(name=tags[-1])
+            queryset = queryset.filter(tags=k.id)
+            tags.pop(-1)
         return queryset
 
     @classmethod
     def get(
         cls,
-        keys: Optional[List[str]] = [],
+        tags: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
         version_type: Optional[str] = "publish",
         version_id: Optional[int] = None,
     ) -> List[FileModel]:
 
-        results = cls.filterFilesWithKeys(keys)
+        results = cls.filterFilesWithTags(tags)
         files = [cls.model.from_django(cls, r) for r in results]
 
         return files
@@ -397,8 +398,8 @@ class File(BaseController[FileModel], FileModel):
     @classmethod
     def create(
         cls,
-        file_name: str,
-        keys: Optional[List[str]] = [],
+        name: str,
+        tags: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
         start_frame:  Optional[str] = None,
@@ -410,12 +411,12 @@ class File(BaseController[FileModel], FileModel):
             app_label="skyline", model=version_type
         )
 
-        key_instances = PublishKey.objects.filter(name__in=keys)
-        if key_instances.count() != len(keys):
-            raise KeyError(f"{len(keys)} keys given, {key_instances.count()} keys found in DB. confirm the key name being passed in during File creation is correct. ")
+        tag_instances = Tag.objects.filter(name__in=tags)
+        if tag_instances.count() != len(tags):
+            raise KeyError(f"{len(tags)} tags given, {tag_instances.count()} tags found in DB. confirm the key name being passed in during File creation is correct. ")
 
         result: SkylineFile = SkylineFile.objects.create(
-            file_name=file_name,
+            name=name,
             parent=parent,
             setting_keyword=setting_keyword,
             version_type=version_contenttype,
@@ -423,7 +424,7 @@ class File(BaseController[FileModel], FileModel):
             start_frame=start_frame,
             end_frame=end_frame,
         )
-        result.keys.set(key_instances)
+        result.tags.set(tag_instances)
         result.save()
         file = cls.from_django(cls, result)
         return file

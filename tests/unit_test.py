@@ -44,7 +44,7 @@ print(version)
 #     version_id=68,
 #     version_type="publish",
 #     keys = ["texture", "bg"],
-#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+#     name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
 #     start_frame=298,
 #     end_frame=298,
 # )
@@ -52,12 +52,12 @@ print(version)
 #     version_id=68,
 #     version_type="publish",
 #     keys = ["camera"],
-#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\associatedFiles\mayaCamera.abc",
+#     name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\associatedFiles\mayaCamera.abc",
 # )
 
 # file1 = File.create(
 #     keys = ["texture", "bg"],
-#     file_name=r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
+#      =r"L:\Temp\TechTeam\TS_PROJ\LEMONCORE\TS_PROJ\animation\season01\101\01\001\COMP\renderOutput\Background\TS_101_01_001_Background_0298.exr",
 #     start_frame=298,
 #     end_frame=298,
 # )
@@ -65,7 +65,7 @@ print(version)
 success = version.add_file(
     keys = ["texture", "background"],
     setting_keyword="camera",
-    file_name=r"TS_101_01_001_Background_0298.exr",
+    name=r"TS_101_01_001_Background_0298.exr",
     start_frame=298,
     end_frame=298,
 )
