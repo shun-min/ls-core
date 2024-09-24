@@ -129,8 +129,7 @@ class APIConfig(Singleton):
         return "api/v1"
 
     def _set_header(self)-> Dict[str, str]:
-        settings_path = RESOURCES_ROOT / "settings.json"
-        json_obj = Utils.json_load(path=settings_path)
+        json_obj = Utils.load_settings()
         return json_obj["HEADER"]
 
     def _get(

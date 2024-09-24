@@ -12,5 +12,6 @@ create settings.json under `lemonsky/resources` folder, copy contents from other
 
 
 # Prerequisites:
-1. clone a copy of LemonCORE-WEB in N drive
+1. clone a copy of LemonCORE-WEB in N drive, edit local settings to point to prod DB
 2. Add requirements of LemonCORE-Web into ls-core, keep them updated
+3. Match dependencies between this library and Skyline

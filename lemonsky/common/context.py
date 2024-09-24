@@ -9,6 +9,10 @@ from ..data.dashboard.models import (
     VersionModel,
 )
 
+from lemonsky.common.helpers import (
+    Utils,
+)
+
 
 class ToolContext():
     def __init__(self):
@@ -21,10 +25,11 @@ class ToolContext():
         fetch current task, current user, PC name etc
 
         """
-        sys.path.append(r"N:\pipeline\Tech_team\repo\LemonCORE-Web")
+        settings_json = Utils.load_settings()
+        sys.path.append(settings_json["ORM_LOCATION"])
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lemoncore.settings')
         django.setup()
-        print("Initialized django ORM")
+        print("Initialized ORM")
 
     def fetch_task_context():
         return
