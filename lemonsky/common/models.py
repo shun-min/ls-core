@@ -35,7 +35,11 @@ class BaseModel:
         return cls(**_)
 
     @classmethod
-    def from_django(cls, api_class, obj):
+    def from_django(
+        cls, 
+        api_class,
+        obj,
+    ):
         """Converts a django object into in-house Entity Model
 
         Args:
@@ -48,6 +52,7 @@ class BaseModel:
         fields = list(obj._meta.fields + obj._meta.many_to_many)
         _ = {
             i.name: getattr(obj, i.name) for i in fields
+            if hasattr(obj, i.name)
         }
         return api_class(**_)
 

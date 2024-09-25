@@ -155,7 +155,8 @@ class TaskModel(BaseModel, CreateModifiedMixin, FlowIdTypeMixin):
     id: int
     draft: bool
     project_content_type: ContentTypeEnums
-    project_content: LeftToRight[Union[Any, SelfURLModel]]
+    project_content_reference_id: int
+    # project_content: LeftToRight[Union[Any, SelfURLModel]]
     step: LeftToRight[Union[StepModel, SelfURLModel]]
     status: TaskStatus
     priority: TaskPriority

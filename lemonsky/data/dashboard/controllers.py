@@ -3,12 +3,14 @@ import os
 import requests
 import sys
 
+from abc import abstractmethod
 from collections.abc import Mapping
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
 import django
 
 from lemonsky.common.models import BaseModel
+from lemonsky.common.singleton import Singleton
 from lemonsky.data.dashboard.models import (
     ProjectModel,
     AssetModel,
@@ -31,16 +33,19 @@ from .url_wrapper import (
 from django.contrib.contenttypes.models import ContentType
 from skyline.models import (
     SkylineProject,
+    SkylineProjectCrew,
     SkylineTask,
     SkylineVersion,
     SkylineVersionPreview,
     Tag,
 )
-from skyline.models import File as SkylineFile
-from skylinecontent.models import ContentGroup
-from skylinecontent.models import Shot as SkylineShot
-from skylinecontent.models import Asset as SkylineAsset
-from skylinecontent.models import Motion as SkylineMotion
+from skyline.models import File as _File
+from skylinecontent.models import (
+    ContentGroup,
+)
+from skylinecontent.models import Shot as _Shot
+from skylinecontent.models import Asset as _Asset
+from skylinecontent.models import Motion as _Motion
 
 
 # _api =  APIConfig()
@@ -49,30 +54,36 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class BaseController(Generic[ModelT]):
+    """
+    Abstract class defining field that holds model type value
+    """
     model: type[ModelT]
-
-
-# class _Project(BaseController[ProjectModel]):
-#     model = ProjectModel
-
-#     @classmethod
-#     def get(cls, code: str) -> ProjectModel:
-#         result = _api._get(url=URL.get_project(code=code))[0]
-#         return cls.model.from_dict(result)
-
-#     @classmethod
-#     def get_assigned_projects(cls):
-#         projects = _api._get(url=URL.assigned_projects)
-#         return projects
 
 
 class Project(BaseController[ProjectModel], ProjectModel):
     model=ProjectModel
 
     @classmethod
-    def get(cls, code: str) -> ProjectModel:
-        result = SkylineProject.objects.get(code=code)
+    def get(
+        cls, 
+        code: Optional[str] = "",
+        id: Optional[int] = None,
+    ) -> ProjectModel:
+        if code:
+            result = SkylineProject.objects.get(code=code)
+        elif id:
+            result = SkylineProject.objects.get(id=id)
         return cls.model.from_django(cls, result)
+
+    @classmethod
+    def get_assigned(
+        cls, 
+        lsid: str
+    ) -> List[ProjectModel]:
+        crews = SkylineProjectCrew.objects.filter(employee__employee_id=lsid.lower())
+        project_ids = [c.project.pk for c in crews]
+        result = SkylineProject.objects.filter(id__in=project_ids)
+        return [cls.model.from_django(cls, p) for p in result]
 
 
 # class _Shot(BaseController[ShotModel]):
@@ -107,7 +118,7 @@ class Shot(BaseController[ShotModel], ShotModel):
         assert project_code, "Must pass in project code. "
         if isinstance(name, int):
             name = str(name)
-        result = SkylineShot.objects.get(
+        result = _Shot.objects.get(
             project__code=project_code,
             name=name,
         )
@@ -119,7 +130,7 @@ class Shot(BaseController[ShotModel], ShotModel):
     #     sequence = shot_code[1]
     #     shot = shot_code[2]
 
-    #     # shot = SkylineShot.objects.get(
+    #     # shot = _Shot.objects.get(
     #     #     project__code=self.project.code,
     #     #     sequence__episode__name=episode,
     #     #     sequence__name= sequence,
@@ -138,7 +149,7 @@ class Asset(BaseController[AssetModel]):
     ) -> AssetModel:
         initial = name[0]
         content_group = ContentGroup.objects.get(name=group)
-        result = SkylineAsset.objects.create(
+        result = _Asset.objects.create(
             name=name,
             initials=initial,
             group=content_group,
@@ -147,7 +158,7 @@ class Asset(BaseController[AssetModel]):
 
 
 class Motion(BaseController[MotionModel]):
-    model = SkylineMotion
+    model = _Motion
 
 
 class Content():
@@ -223,7 +234,7 @@ class Task(BaseController[TaskModel], TaskModel):
         content_type: str,
         content_name: str,
         step_code: str,
-    ) -> TaskModel:
+    ) -> List[TaskModel]:
         CONTENT_CLASS_MAP = {
             "shot": Shot,
             "asset": Asset,
@@ -240,11 +251,8 @@ class Task(BaseController[TaskModel], TaskModel):
             project_content_type=c.id,
             project_content_reference_id=content.id,
             step__code=step_code,
-        )[0]
-
-        if not result:
-            return []
-        return result
+        )
+        return [cls.model.from_django(cls, t) for t in result]
 
     def get_all_versions():
         return
@@ -275,7 +283,7 @@ class Version(BaseController[VersionModel], VersionModel):
     ) -> List[VersionModel]:
         if id:
             result = SkylineVersion.objects.filter(id=id)
-        if task and internal_version:
+        elif task and internal_version:
             result = SkylineVersion.objects.filter(
                 task__id= task.id,
                 task__step__name=task.step.name,
@@ -373,7 +381,7 @@ class File(BaseController[FileModel], FileModel):
 
     @classmethod
     def filterFilesWithTags(cls, tags: List[str]):
-        queryset = SkylineFile.objects.all()
+        queryset = _File.objects.all()
         while len(tags) > 0:
             k = Tag.objects.get(name=tags[-1])
             queryset = queryset.filter(tags=k.id)
@@ -415,7 +423,7 @@ class File(BaseController[FileModel], FileModel):
         if tag_instances.count() != len(tags):
             raise KeyError(f"{len(tags)} tags given, {tag_instances.count()} tags found in DB. confirm the key name being passed in during File creation is correct. ")
 
-        result: SkylineFile = SkylineFile.objects.create(
+        result = _File.objects.create(
             name=name,
             parent=parent,
             setting_keyword=setting_keyword,
