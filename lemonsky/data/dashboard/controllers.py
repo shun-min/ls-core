@@ -34,6 +34,7 @@ from django.contrib.contenttypes.models import ContentType
 from skyline.models import (
     SkylineProject,
     SkylineProjectCrew,
+    SkylineStep,
     SkylineTask,
     SkylineVersion,
     SkylineVersionPreview,
@@ -193,7 +194,7 @@ class Step(BaseController[ProjectModel]):
 
     @classmethod
     def get(cls, code: str) -> StepModel:
-        result = _api._get(url=URL.get_step(code=code))[0]
+        result = SkylineStep._get(code=code)[0]
         return cls.model.from_dict(result)
 
 

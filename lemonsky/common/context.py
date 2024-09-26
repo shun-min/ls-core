@@ -1,5 +1,5 @@
-from collections.abc import Mapping
-from typing import Any, Dict, List, Optional
+from collections.abc import Callable, Mapping
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..data.hrm.models import (
     EmployeeModel,
@@ -22,8 +22,33 @@ from lemonsky.data.dashboard.controllers import (
     Project,
 )
 
+from skyline.models import (
+    SkylineProjectCrew,
+)
 
-class BaseContext(ABC, Singleton):
+
+class BaseContext(ABC):
+    def __init__(self):
+        super().__init__()
+        self._all: List[Any] = []
+        self._current: Any = None
+    
+    @property
+    def all(self):
+        return self._all
+
+    @all.setter
+    def all(self, value: List[Any]):
+        self._all = value
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, value: Any):
+        self._current = value
+        self.notify()
+    
     """
     Applies Observer pattern. Subject interface that declares a ser of methods to manage subscribers
     """
@@ -35,7 +60,7 @@ class BaseContext(ABC, Singleton):
         pass
 
     @abstractmethod
-    def dettach():
+    def detach():
         """
         dettach an observer to subject
         """
@@ -49,47 +74,68 @@ class BaseContext(ABC, Singleton):
         pass
 
 
-class BaseObserver(ABC, Singleton):
-    def __init__(self):
-        super().__init__()
-        self._all: List[Any] = []
-        self._current: Any = None
-    
+class BaseObserver(ABC):    
+    def __init__(
+        self,
+        func: Optional[Callable] = None,
+    ):
+        self._func = func
+
     @abstractmethod
     def update():
         pass
+
+
+class UserContext(BaseContext, Singleton):
+    _observers: List[Mapping[BaseObserver]] = []
+    def __init__(self):
+        self._crew_data: Optional[SkylineProjectCrew] = None
     
+    def attach(
+        self, 
+        observers: List[Any] | Any,
+    ) -> None:
+        if isinstance(observers, list):
+            self._observers.extend(observers)
+        else:
+            self._observers.append(observers)
+
+    def detach(self, observer):
+        self._observers.remove(observer)
+
+    def notify(self):
+        for observer in self._observers:
+            observer.update(self)
+
     @property
-    def all(self):
-        return self._all
+    def crew_data(self):
+        return self._crew_data
 
-    @all.setter
-    def all(self, value: List[Any]):
-        self._all = value
-
-    @property
-    def current(self):
-        return self._all
-
-    @current.setter
-    def current(self, value: List[Any]):
-        self._current = value
+    @crew_data.setter
+    def crew_data(self, value: SkylineProjectCrew):
+        self._crew_data= value
 
 
-class ProjectContext(BaseContext):
+class ProjectContext(BaseContext, Singleton):
     """
     Holds project state that'll affect observing contexts
     """
     def __init__(self):
-        self._observers: List[Mapping[BaseObserver]] = []
+        self._observers: List[Any] = []
     
-    def attach(self, observer: Mapping[BaseObserver]):
-        self._observers.append(observer)
+    def attach(
+        self,
+        observers: List[Any] | Any,
+    ) -> None:
+        if isinstance(observers, list):
+            self._observers.extend(observers)
+        else:
+            self._observers.append(observers)
 
-    def dettach(self, observer: Mapping[BaseObserver]):
+    def detach(self, observer):
         self._observers.remove(observer)
 
-    def notify(self, observer: Mapping[BaseObserver]):
+    def notify(self):
         for observer in self._observers:
             observer.update(self)
 
@@ -102,30 +148,15 @@ class GroupContext(BaseContext):
         # self._current: ProjectModel = None
         self._observers: List[Mapping[BaseObserver]] = []
     
-    def attach(self, observer: Mapping[BaseObserver]):
+    def attach(self, observer: Any):
         self._observers.append(observer)
 
-    def dettach(self, observer: Mapping[BaseObserver]):
+    def detach(self, observer):
         self._observers.remove(observer)
 
-    def notify(self, observer: Mapping[BaseObserver]):
+    def notify(self, observer):
         for observer in self._observers:
             observer.update(self)
-
-
-class UserContext(BaseContext):
-    _observers: List[BaseObserver] = []
-    
-    def attach(self, observer: Mapping[BaseObserver]):
-        self._observers.append(observer)
-
-    def dettach(self, observer: Mapping[BaseObserver]):
-        self._observers.remove(observer)
-
-    def notify(self, observer: Mapping[BaseObserver]):
-        for observer in self._observers:
-            observer.update(self)
-
 
 class ToolContext(Singleton):
     """
@@ -135,18 +166,10 @@ class ToolContext(Singleton):
     def __init__(self):
         super().__init__()
         self.projects: ProjectContext = ProjectContext()
-        # self.tasks: TaskContext()
         self.users: UserContext = UserContext()
-        self.init_context()
 
     def init_context(self) -> None:
         
-        return
-
-    def fetch_task_context():
-        return
-
-    def fetch_current_user():
         return
 
     def fetch_machine_name():
