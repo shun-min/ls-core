@@ -125,68 +125,95 @@ class Shot(BaseController[ShotModel], ShotModel):
         )
         return cls.model.from_django(cls, result)
 
-    # def get_tasks(self):
-    #     shot_code = self.name.split("_")
-    #     episode = shot_code[0]
-    #     sequence = shot_code[1]
-    #     shot = shot_code[2]
+    @classmethod
+    def get_all(
+        cls,
+        project_code: str,
+        category: Optional[str] = None,
+    ) -> List[ShotModel]:
+        kwargs = {
+            "project__code": project_code,
+        }
+        content_groups = ContentGroup.objects.filter(category=category)
+        if category:
+            kwargs.update({"group__in": content_groups})
+            
+        result = _Shot.objects.filter(**kwargs)
+        return [cls.model.from_django(cls, r) for r in result]
 
-    #     # shot = _Shot.objects.get(
-    #     #     project__code=self.project.code,
-    #     #     sequence__episode__name=episode,
-    #     #     sequence__name= sequence,
-    #     #     name=shot,
-    #     # )
 
-
-class Asset(BaseController[AssetModel]):
+class Asset(BaseController[AssetModel], AssetModel):
     model = AssetModel
 
     @classmethod
     def get(
         cls,
         name: str,
-        group: str,
-    ) -> AssetModel:
-        initial = name[0]
-        content_group = ContentGroup.objects.get(name=group)
-        result = _Asset.objects.create(
-            name=name,
-            initials=initial,
-            group=content_group,
+        project_code: str,
+    ) -> List[AssetModel]:
+        assert project_code, "Must pass in project code. "
+        kwargs = {
+            "name": name,
+            "initial": name[0],
+            "project_code": project_code,
+        }
+        result = _Asset.objects.filter(
+            **kwargs
         )
-        return cls.model.from_django(cls, result)
+        return [cls.model.from_django(cls, r) for r in result]
+
+    @classmethod
+    def get_all(
+        cls,
+        project_code: str,
+        category: Optional[List[ContentGroup]] = None,
+    ) -> List[AssetModel]:
+        kwargs = {
+            "project__code": project_code,
+        }
+        content_groups = ContentGroup.objects.filter(category=category)
+        if category:
+            kwargs.update({"group__in": content_groups})
+        result = _Asset.objects.filter(**kwargs)
+        return [cls.model.from_django(cls, r) for r in result]
 
 
-class Motion(BaseController[MotionModel]):
+class Motion(BaseController[MotionModel], MotionModel):
     model = _Motion
 
 
 class Content():
+    CONTENT_CLASS_MAP = {
+        "shot": Shot,
+        "asset": Asset,
+        "motion": Motion,
+    }
     @classmethod
     def get(
         cls,
         type: ContentTypeEnums,
         name: str,
         project_code: str,
-    ):
-        CONTENT_CLASS_MAP = {
-            "shot": Shot,
-            "asset": Asset,
-            "motion": Motion,
-        }
-        MODEL_MAP = {
-            "shot": ShotModel,
-            "asset": AssetModel,
-            "motion": MotionModel,
-        }
-        content_class = CONTENT_CLASS_MAP[type]
-        model = MODEL_MAP[type]
-
+        category: Optional[str] = None,
+    ) -> List[Union[ShotModel, AssetModel, MotionModel]]:
+        content_class = cls.CONTENT_CLASS_MAP[type]
         return content_class.get(name=name, project_code=project_code)
 
-    def get_tasks():
-        return
+    @classmethod
+    def get_all(
+        cls,
+        type: str,
+        project_code: str,
+        category: Optional[str] = None,
+    ) -> List[Union[ShotModel, AssetModel, MotionModel]]:
+        content_class = cls.CONTENT_CLASS_MAP[type]
+        kwargs = {
+            "project_code": project_code,
+        }
+        if category:
+            kwargs.update({"category": category})
+            
+        return content_class.get_all(**kwargs)
 
 
 class Step(BaseController[ProjectModel]):

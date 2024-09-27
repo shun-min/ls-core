@@ -15,7 +15,7 @@ from lemonsky.common.models import (
     LeftToRight,
     SelfURLModel,
 )
-from lemonsky.pipeline.hrm.models import (
+from lemonsky.data.hrm.models import (
     ClientModel,
     DepartmentModel,
     EmployeeModel
@@ -117,7 +117,7 @@ class AssetModel(ContentMixin, BaseModel):
     shot: Union[ShotModel, None]
     slot: Union[int, None]
     group: ContentGroupModel
-    initials: str
+    initial: str
     batch: Union[str, None]
 
 

@@ -27,8 +27,8 @@ from skyline.models import (
 class BaseContext(ABC):
     def __init__(self):
         super().__init__()
-        self._all: List[Any] = []
-        self._current: Any = None
+        self._all: List[self.__class__] = []
+        self._current: self.__class__ = None
     
     @property
     def all(self):
@@ -76,6 +76,11 @@ class BaseObserver(ABC):
         self,
         func: Optional[Callable] = None,
     ):
+        """_summary_
+
+        Args:
+            func (Optional[Callable], optional): The function that is passed in when initializing the concrete observer. Defaults to None.
+        """
         self._func = func
 
     @abstractmethod
