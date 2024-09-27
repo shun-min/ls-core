@@ -11,7 +11,7 @@ import django
 
 from lemonsky.common.models import BaseModel
 from lemonsky.common.singleton import Singleton
-from lemonsky.data.dashboard.models import (
+from lemonsky.data.pipeline.models import (
     ProjectModel,
     AssetModel,
     ShotModel,

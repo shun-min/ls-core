@@ -77,7 +77,7 @@
 
 
 
-from lemonsky.data.dashboard.controllers import Project, Shot, Task, Version, File
+from lemonsky.data.pipeline.controllers import Project, Shot, Task, Version, File
 projects = Project.get_assigned(lsid="ls0915")
 
 p = Project.get(code="TS")

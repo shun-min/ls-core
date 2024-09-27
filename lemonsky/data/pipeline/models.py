@@ -15,7 +15,7 @@ from lemonsky.common.models import (
     LeftToRight,
     SelfURLModel,
 )
-from lemonsky.data.hrm.models import (
+from lemonsky.pipeline.hrm.models import (
     ClientModel,
     DepartmentModel,
     EmployeeModel

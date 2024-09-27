@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Optional, Type, Union
 from ..data.hrm.models import (
     EmployeeModel,
 )
-from lemonsky.data.dashboard.controllers import (
+from lemonsky.data.pipeline.controllers import (
     Project,
 )
-from lemonsky.data.dashboard.models import (
+from lemonsky.data.pipeline.models import (
     ProjectModel,
     TaskModel,
     VersionModel,
@@ -18,9 +18,6 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 
 from lemonsky.common.singleton import Singleton
-from lemonsky.data.dashboard.controllers import (
-    Project,
-)
 
 from skyline.models import (
     SkylineProjectCrew,
