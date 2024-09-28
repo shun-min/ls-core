@@ -225,33 +225,6 @@ class Step(BaseController[ProjectModel]):
         return cls.model.from_dict(result)
 
 
-# class _Task(BaseController[TaskModel]):
-#     model = TaskModel
-
-#     @classmethod
-#     def get(
-#         cls,
-#         project_code: str,
-#         content_type: str,
-#         content_name: str,
-#         step_code: str,
-#     ):
-#         step = Step.get(code=step_code)
-#         content = Content.get(
-#             project_code=project_code,
-#             type=content_type,
-#             name=content_name,
-#         )
-#         result = _api._get(
-#             url=URL.get_task(
-#                 content_type=content_type,
-#                 content_id=content.id,
-#                 step_id=step.id,
-#             )
-#         )[0]
-#         return cls.model.from_dict(result)
-
-
 class Task(BaseController[TaskModel], TaskModel):
     model = TaskModel
 
@@ -384,24 +357,18 @@ class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
     model = PreviewVersionModel
 
     @classmethod
-    def get():
+    def get(
+        cls,
+        id: int, 
+        internal_version: int,
+        client_version: int,
+        parent: Union[VersionModel, int],
+    ):  
+        args = {}
+        if id:
+            args.update()
+        SkylineVersionPreview.objects.filter()
         return
-
-
-# class _File(BaseController[FileModel]):
-#     model = FileModel
-
-#     @classmethod
-#     def get(
-#         cls,
-#         tags: Optional[List[str]] = [],
-#         parent: Optional[int] = None,
-#         setting_keyword: Optional[str] = "",
-#         version_id: Optional[int] = None,
-#     ) -> Dict[str, Union[str, int, Dict[str, str]]]:
-#         response = _api._get(url=URL.file(version_id=version_id))
-#         entities = cls.model.from_dict(response.json())
-#         return entities
 
 
 class File(BaseController[FileModel], FileModel):
