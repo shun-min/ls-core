@@ -76,7 +76,7 @@
 # # version.publish()
 
 
-from lemonsky.data.pipeline.controllers import Content
+from studio.data.pipeline.controllers import Content
 contents = Content.get_all(
     type="asset",
     project_code="TS",
@@ -84,7 +84,7 @@ contents = Content.get_all(
 )
 
 
-from lemonsky.data.pipeline.controllers import Project, Shot, Task, Version, File
+from studio.data.pipeline.controllers import Project, Shot, Task, Version, File
 projects = Project.get_assigned(lsid="ls0915")
 
 p = Project.get(code="TS")
