@@ -19,8 +19,8 @@ from typing import Any, List
 
 from studio.common.singleton import Singleton
 
-from skyline.models import (
-    SkylineProjectCrew,
+from studio.models import (
+    StudioProjectCrew,
 )
 
 
@@ -91,7 +91,7 @@ class BaseObserver(ABC):
 class UserContext(BaseContext, Singleton):
     _observers: List[Mapping[BaseObserver]] = []
     def __init__(self):
-        self._crew_data: Optional[SkylineProjectCrew] = None
+        self._crew_data: Optional[StudioProjectCrew] = None
     
     def attach(
         self, 
@@ -114,7 +114,7 @@ class UserContext(BaseContext, Singleton):
         return self._crew_data
 
     @crew_data.setter
-    def crew_data(self, value: SkylineProjectCrew):
+    def crew_data(self, value: StudioProjectCrew):
         self._crew_data= value
 
 
@@ -144,7 +144,7 @@ class ProjectContext(BaseContext, Singleton):
 
 class GroupContext(BaseContext):
     """
-    Holds ContentGroup state. Content Group is a special class made for categorizing contents for display in the Skyline hierarchy tree
+    Holds ContentGroup state. Content Group is a special class made for categorizing contents for display in the Studio hierarchy tree
     """
     def __int__(self):
         # self._current: ProjectModel = None

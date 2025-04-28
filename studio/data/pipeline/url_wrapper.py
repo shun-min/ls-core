@@ -21,30 +21,30 @@ from .models import (
 )
 
 class URL:
-    assigned_projects = r"skyline/projects?assigned_to=1940"
-    all_shots = r"skyline_content/shots/"
-    all_assets = r"skyline_content/assets/"
+    assigned_projects = r"studio/projects?assigned_to=1940"
+    all_shots = r"studio_content/shots/"
+    all_assets = r"studio_content/assets/"
 
     @classmethod
     def get_project(
         cls,
         code: str,
     ) -> str:
-        return rf"skyline/projects?code={code}"
+        return rf"studio/projects?code={code}"
 
     @classmethod
     def get_step(
         cls,
         code: str,
     ) -> str:
-        return rf"skyline/steps?code={code}"
+        return rf"studio/steps?code={code}"
 
     @classmethod
     def get_shots_by_episode(
         cls,
         episode: int
     ) -> str:
-        return rf"skyline_content/shots?episode_id={episode}"
+        return rf"studio_content/shots?episode_id={episode}"
 
     @classmethod
     def get_content(
@@ -53,7 +53,7 @@ class URL:
         type: ContentTypeEnums,
         name: str,
     ) -> str:
-        return rf"skyline/{type}?project_id={project_id}&"
+        return rf"studio/{type}?project_id={project_id}&"
 
     @classmethod
     def get_shot(
@@ -61,7 +61,7 @@ class URL:
         shot_code: str,
         project_id: int,
     ) -> str:
-        return rf"skyline_content/shots?shot_code={shot_code}&project_id={project_id}"
+        return rf"studio_content/shots?shot_code={shot_code}&project_id={project_id}"
 
     @classmethod
     def get_task(
@@ -70,14 +70,14 @@ class URL:
         content_id: int,
         step_id: int,
     ) -> str:
-        return rf"skyline/tasks?project_content_type={content_type}&content_id={content_id}&step_id={step_id}"
+        return rf"studio/tasks?project_content_type={content_type}&content_id={content_id}&step_id={step_id}"
 
     @classmethod
     def get_version(
         cls,
         task_id: str,
     ) -> str:
-        return rf"skyline/versions?task_id={task_id}"
+        return rf"studio/versions?task_id={task_id}"
 
     @classmethod
     def file(
@@ -85,10 +85,10 @@ class URL:
         keys: Optional[List[str]] = [],
         parent: Optional[int] = None,
         setting_keyword: Optional[str] = "",
-        version_type: Optional[str] = "skylineversion",
+        version_type: Optional[str] = "studioversion",
         version_id: Optional[int] = None,
     ) -> str:
-        full_url = rf"skyline/files?"
+        full_url = rf"studio/files?"
         if version_id:
             full_url = full_url + f"version_type={version_type}&version_id={version_id}&"
 

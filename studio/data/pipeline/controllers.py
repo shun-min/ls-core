@@ -31,30 +31,28 @@ from .url_wrapper import (
 )
 
 from django.contrib.contenttypes.models import ContentType
-from skyline.models import (
-    SkylineProject,
-    SkylineProjectCrew,
-    SkylineStep,
-    SkylineTask,
-    SkylineVersion,
-    SkylineVersionPreview,
+from studio.models import (
+    StudioProject,
+    StudioProjectCrew,
+    StudioStep,
+    StudioTask,
+    StudioVersion,
+    StudioVersionPreview,
     Tag,
 )
-from skyline.models import File as _File
-from skylinecontent.models import (
+from studio.models import File as _File
+from studiocontent.models import (
     ContentGroup,
 )
-from skylinecontent.models import Shot as _Shot
-from skylinecontent.models import Asset as _Asset
-from skylinecontent.models import Motion as _Motion
+from studiocontent.models import Shot as _Shot
+from studiocontent.models import Asset as _Asset
+from studiocontent.models import Motion as _Motion
 
 
 # _api =  APIConfig()
-T = TypeVar("T")
-ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
-class BaseController(Generic[ModelT]):
+class BaseController():
     """
     Abstract class defining field that holds model type value
     """
@@ -71,9 +69,9 @@ class Project(BaseController[ProjectModel], ProjectModel):
         id: Optional[int] = None,
     ) -> ProjectModel:
         if code:
-            result = SkylineProject.objects.get(code=code)
+            result = StudioProject.objects.get(code=code)
         elif id:
-            result = SkylineProject.objects.get(id=id)
+            result = StudioProject.objects.get(id=id)
         return cls.model.from_django(cls, result)
 
     @classmethod
@@ -81,9 +79,9 @@ class Project(BaseController[ProjectModel], ProjectModel):
         cls, 
         lsid: str
     ) -> List[ProjectModel]:
-        crews = SkylineProjectCrew.objects.filter(employee__employee_id=lsid.lower())
+        crews = StudioProjectCrew.objects.filter(employee__employee_id=lsid.lower())
         project_ids = [c.project.pk for c in crews]
-        result = SkylineProject.objects.filter(id__in=project_ids)
+        result = StudioProject.objects.filter(id__in=project_ids)
         return [cls.model.from_django(cls, p) for p in result]
 
 
@@ -221,7 +219,7 @@ class Step(BaseController[ProjectModel]):
 
     @classmethod
     def get(cls, code: str) -> StepModel:
-        result = SkylineStep._get(code=code)[0]
+        result = StudioStep._get(code=code)[0]
         return cls.model.from_dict(result)
 
 
@@ -248,7 +246,7 @@ class Task(BaseController[TaskModel], TaskModel):
             project_code=project_code,
             name=content_name,
         )
-        result = SkylineTask.objects.filter(
+        result = StudioTask.objects.filter(
             project_content_type=c.id,
             project_content_reference_id=content.id,
             step__code=step_code,
@@ -283,9 +281,9 @@ class Version(BaseController[VersionModel], VersionModel):
         task: Optional[TaskModel] = None,
     ) -> List[VersionModel]:
         if id:
-            result = SkylineVersion.objects.filter(id=id)
+            result = StudioVersion.objects.filter(id=id)
         elif task and internal_version:
-            result = SkylineVersion.objects.filter(
+            result = StudioVersion.objects.filter(
                 task__id= task.id,
                 task__step__name=task.step.name,
                 internal_version=internal_version,
@@ -300,9 +298,9 @@ class Version(BaseController[VersionModel], VersionModel):
     def create(
         cls,
         client_version: str,
-        task: SkylineTask,
+        task: StudioTask,
     ) -> VersionModel:
-        result = SkylineVersion.objects.create(
+        result = StudioVersion.objects.create(
             status="wip",
             task=task,
             client_version=2,
@@ -328,7 +326,7 @@ class Version(BaseController[VersionModel], VersionModel):
                 start_frame=start_frame,
                 end_frame=end_frame,
                 version=self,
-                version_type="skylineversion"
+                version_type="studioversion"
             )
         except Exception as e:
             print(f"File not registered. \n{e}")
@@ -367,7 +365,7 @@ class PreviewVersion(BaseController[PreviewVersionModel], PreviewVersionModel):
         args = {}
         if id:
             args.update()
-        SkylineVersionPreview.objects.filter()
+        StudioVersionPreview.objects.filter()
         return
 
 
@@ -407,11 +405,11 @@ class File(BaseController[FileModel], FileModel):
         setting_keyword: Optional[str] = "",
         start_frame:  Optional[str] = None,
         end_frame:  Optional[str] = None,
-        version_type: Optional[str] = "skylineversion",
+        version_type: Optional[str] = "studioversion",
         version: Optional[VersionModel] = None,
     ) -> FileModel:
         version_contenttype = ContentType.objects.get(
-            app_label="skyline", model=version_type
+            app_label="studio", model=version_type
         )
 
         tag_instances = Tag.objects.filter(name__in=tags)
